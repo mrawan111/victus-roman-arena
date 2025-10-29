@@ -5,9 +5,11 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { products } from "@/data/products";
+import { useCart } from "@/contexts/CartContext";
 
 const ProductDetail = () => {
   const { id } = useParams();
+  const { addToCart } = useCart();
   const product = products.find((p) => p.id === id);
 
   if (!product) {
@@ -95,6 +97,13 @@ const ProductDetail = () => {
                 <Button 
                   className="w-full gradient-roman text-lg py-6"
                   disabled={!product.inStock}
+                  onClick={() => addToCart({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    image: product.image,
+                    category: product.category,
+                  })}
                 >
                   <ShoppingCart className="mr-2 h-5 w-5" />
                   {product.inStock ? "Add to Cart" : "Out of Stock"}

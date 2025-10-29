@@ -3,6 +3,7 @@ import { ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useCart } from "@/contexts/CartContext";
 
 interface ProductCardProps {
   id: string;
@@ -14,6 +15,8 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({ id, name, price, image, category, inStock = true }: ProductCardProps) => {
+  const { addToCart } = useCart();
+  
   return (
     <Card className="group overflow-hidden shadow-elegant hover:shadow-gold transition-all duration-300 hover:-translate-y-1">
       <Link to={`/product/${id}`}>
@@ -49,6 +52,10 @@ const ProductCard = ({ id, name, price, image, category, inStock = true }: Produ
         <Button 
           className="w-full gradient-roman hover:opacity-90 transition-opacity"
           disabled={!inStock}
+          onClick={(e) => {
+            e.preventDefault();
+            addToCart({ id, name, price, image, category });
+          }}
         >
           <ShoppingCart className="mr-2 h-4 w-4" />
           {inStock ? "Add to Cart" : "Out of Stock"}
