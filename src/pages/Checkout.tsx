@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Checkout = () => {
   const { items, totalPrice, clearCart } = useCart();
@@ -31,7 +32,7 @@ const Checkout = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validate form
@@ -47,14 +48,78 @@ const Checkout = () => {
       return;
     }
 
-    // Simulate order processing
-    toast({
-      title: "Order Placed Successfully!",
-      description: `Total: $${totalPrice.toFixed(2)}. Thank you for your purchase!`,
-    });
+    try {
+      // Create customer
+      const { data: customer, error: customerError } = await supabase
+        .from("customers")
+        .insert({
+          full_name: `${formData.firstName} ${formData.lastName}`,
+          email: formData.email,
+          phone: formData.phone,
+          address: formData.address,
+          city: formData.city,
+          zip_code: formData.zipCode,
+          country: formData.country,
+        })
+        .select()
+        .single();
 
-    clearCart();
-    setTimeout(() => navigate("/"), 2000);
+      if (customerError) throw customerError;
+
+      // Generate order number
+      const orderNumber = `ORD-${Date.now()}`;
+
+      // Create order
+      const { data: order, error: orderError } = await supabase
+        .from("orders")
+        .insert({
+          customer_id: customer.id,
+          order_number: orderNumber,
+          subtotal: totalPrice,
+          shipping: 0,
+          tax: 0,
+          total: totalPrice,
+          status: "pending",
+          shipping_address: formData.address,
+          shipping_city: formData.city,
+          shipping_zip: formData.zipCode,
+          shipping_country: formData.country,
+        })
+        .select()
+        .single();
+
+      if (orderError) throw orderError;
+
+      // Create order items
+      const orderItems = items.map((item) => ({
+        order_id: order.id,
+        product_id: item.id,
+        product_name: item.name,
+        quantity: item.quantity,
+        price: item.price,
+      }));
+
+      const { error: itemsError } = await supabase
+        .from("order_items")
+        .insert(orderItems);
+
+      if (itemsError) throw itemsError;
+
+      toast({
+        title: "Order Placed Successfully!",
+        description: `Order ${orderNumber}. Total: $${totalPrice.toFixed(2)}`,
+      });
+
+      clearCart();
+      setTimeout(() => navigate("/"), 2000);
+    } catch (error: any) {
+      console.error("Error placing order:", error);
+      toast({
+        title: "Order Failed",
+        description: error.message || "Failed to place order. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   if (items.length === 0) {
