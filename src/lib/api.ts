@@ -186,6 +186,8 @@ export const cartProductsAPI = {
 export const ordersAPI = {
   getAll: async () => apiRequest<any[]>("/orders"),
 
+  getWithProducts: async () => apiRequest<any[]>("/orders/with-products"),
+
   getById: async (id: number) => apiRequest<any>(`/orders/${id}`),
 
   getByEmail: async (email: string) => apiRequest<any[]>(`/orders/user/${email}`),

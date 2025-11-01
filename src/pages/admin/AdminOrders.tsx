@@ -15,6 +15,7 @@ export default function AdminOrders() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
+
   const { toast } = useToast();
 
   useEffect(() => {
@@ -23,9 +24,9 @@ export default function AdminOrders() {
 
   const loadOrders = async () => {
     try {
-      const data = await ordersAPI.getAll();
+      const data = await ordersAPI.getWithProducts();
       // Sort by creation date (newest first)
-      const sortedOrders = (data || []).sort((a: any, b: any) => 
+      const sortedOrders = (data || []).sort((a: any, b: any) =>
         new Date(b.orderDate || b.createdAt || 0).getTime() - new Date(a.orderDate || a.createdAt || 0).getTime()
       );
       setOrders(sortedOrders);
@@ -40,6 +41,8 @@ export default function AdminOrders() {
       setLoading(false);
     }
   };
+
+
 
   const handleViewOrder = async (order: any) => {
     try {
@@ -179,41 +182,63 @@ export default function AdminOrders() {
                   <p className="text-sm text-muted-foreground">{selectedOrder.phoneNum || "-"}</p>
                 </div>
                 <div>
-                  <h3 className="font-semibold mb-2">Shipping Address</h3>
-                  <p className="text-sm">{selectedOrder.address || "-"}</p>
+                  <h3 className="font-semibold mb-2">Order Information</h3>
+                  <p className="text-sm"><span className="font-medium">Date:</span> {new Date(selectedOrder.orderDate || selectedOrder.createdAt || Date.now()).toLocaleString()}</p>
+                  <p className="text-sm"><span className="font-medium">Payment Method:</span> {selectedOrder.paymentMethod || "-"}</p>
+                  <p className="text-sm"><span className="font-medium">Payment Status:</span> {selectedOrder.paymentStatus || "-"}</p>
                 </div>
+              </div>
+              <div>
+                <h3 className="font-semibold mb-2">Shipping Address</h3>
+                <p className="text-sm">{selectedOrder.address || "-"}</p>
               </div>
 
               <div>
                 <h3 className="font-semibold mb-2">Order Items</h3>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Product</TableHead>
-                      <TableHead>Quantity</TableHead>
-                      <TableHead>Price</TableHead>
-                      <TableHead>Total</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {selectedOrder.orderItems?.length > 0 ? (
-                      selectedOrder.orderItems.map((item: any, index: number) => (
-                        <TableRow key={item.id || index}>
-                          <TableCell>{item.productName || "Product"}</TableCell>
-                          <TableCell>{item.quantity}</TableCell>
-                          <TableCell>${Number(item.price || item.priceAtTime || 0).toFixed(2)}</TableCell>
-                          <TableCell>${(Number(item.price || item.priceAtTime || 0) * item.quantity).toFixed(2)}</TableCell>
-                        </TableRow>
-                      ))
-                    ) : (
+                {selectedOrder.orderItems ? (
+                  <Table>
+                    <TableHeader>
                       <TableRow>
-                        <TableCell colSpan={4} className="text-center py-4 text-muted-foreground">
-                          No items found
-                        </TableCell>
+                        <TableHead>Product</TableHead>
+                        <TableHead>Variant</TableHead>
+                        <TableHead>Quantity</TableHead>
+                        <TableHead>Price</TableHead>
+                        <TableHead>Total</TableHead>
                       </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {selectedOrder.orderItems.length > 0 ? (
+                        selectedOrder.orderItems.map((item: any, index: number) => {
+                          // Use embedded product details from the API response
+                          const productName = item.variant?.product?.productName || "Unknown Product";
+                          const variantDetails = `${item.variant?.color || ""} ${item.variant?.size || ""}`.trim() || "Default";
+
+                          return (
+                            <TableRow key={item.id || index}>
+                              <TableCell className="font-medium">{productName}</TableCell>
+                              <TableCell className="text-sm text-muted-foreground">{variantDetails}</TableCell>
+                              <TableCell>{item.quantity}</TableCell>
+                              <TableCell>${Number(item.priceAtTime || 0).toFixed(2)}</TableCell>
+                              <TableCell>${(Number(item.priceAtTime || 0) * item.quantity).toFixed(2)}</TableCell>
+                            </TableRow>
+                          );
+                        })
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center py-4 text-muted-foreground">
+                            No items found
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground bg-muted/50 rounded-lg">
+                    <Package className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">Order items details are not available in this view.</p>
+                    <p className="text-xs mt-1">The order items are not embedded in the current API response.</p>
+                  </div>
+                )}
               </div>
 
               <div className="flex justify-between items-center pt-4 border-t">
