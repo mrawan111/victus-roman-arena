@@ -1,18 +1,61 @@
 import { Link } from "react-router-dom";
-import { ShoppingCart, Menu } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ShoppingCart, Menu, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useCart } from "@/contexts/CartContext";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 import victusLogo from "@/assets/victus-logo.png";
 
 const Navbar = () => {
   const { totalItems } = useCart();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    checkAuthStatus();
+  }, []);
+
+  const checkAuthStatus = () => {
+    const userSession = localStorage.getItem("userSession");
+    if (userSession) {
+      try {
+        const sessionData = JSON.parse(userSession);
+        if (sessionData.loggedIn && sessionData.token) {
+          setIsLoggedIn(true);
+          setUser(sessionData.user);
+        }
+      } catch {
+        // Invalid session
+      }
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("userSession");
+    setIsLoggedIn(false);
+    setUser(null);
+    toast({
+      title: "Logged out",
+      description: "You've been successfully logged out",
+    });
+    navigate("/");
+  };
   const navLinks = [
     { name: "Home", path: "/" },
     { name: "Shop", path: "/shop" },
     { name: "About", path: "/about" },
     { name: "Contact", path: "/contact" },
-    { name: "Admin", path: "/auth" },
   ];
 
   return (
@@ -42,6 +85,40 @@ const Navbar = () => {
                 {link.name}
               </Link>
             ))}
+            
+            {isLoggedIn ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <User className="h-4 w-4" />
+                    {user?.firstName || user?.email || "Account"}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem asChild>
+                    <Link to="/">My Account</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/orders">My Orders</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Button asChild variant="ghost" size="sm">
+                  <Link to="/login">Sign In</Link>
+                </Button>
+                <Button asChild variant="default" size="sm" className="gradient-roman">
+                  <Link to="/signup">Sign Up</Link>
+                </Button>
+              </div>
+            )}
+            
             <Button asChild variant="default" size="icon" className="relative gradient-roman">
               <Link to="/cart">
                 <ShoppingCart className="h-5 w-5" />
@@ -72,6 +149,35 @@ const Navbar = () => {
                     {link.name}
                   </Link>
                 ))}
+                <div className="pt-4 border-t">
+                  {isLoggedIn ? (
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground">
+                        {user?.firstName || user?.email || "User"}
+                      </p>
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={handleLogout}
+                      >
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Logout
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <Button asChild variant="ghost" className="w-full">
+                        <Link to="/login">
+                          <User className="mr-2 h-4 w-4" />
+                          Sign In
+                        </Link>
+                      </Button>
+                      <Button asChild variant="default" className="w-full gradient-roman">
+                        <Link to="/signup">Sign Up</Link>
+                      </Button>
+                    </div>
+                  )}
+                </div>
                 <Button asChild variant="default" className="w-full gradient-roman">
                   <Link to="/cart">
                     <ShoppingCart className="mr-2 h-5 w-5" />

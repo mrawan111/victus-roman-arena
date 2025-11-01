@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { supabase } from "@/integrations/supabase/client";
+import { productsAPI } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 
 const Shop = () => {
@@ -23,37 +23,50 @@ const Shop = () => {
 
   const loadProducts = async () => {
     try {
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .eq("in_stock", true)
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-      setProducts(data || []);
+      setLoading(true);
+      const response = await productsAPI.getAll(0, 100);
+      // Map API products to match our ProductCard component
+      const mappedProducts = response.content.map((product: any) => ({
+        id: product.productId.toString(),
+        name: product.productName,
+        price: product.basePrice,
+        image: product.images?.[0]?.imageUrl || "/placeholder.svg",
+        category: product.category?.categoryName || "Uncategorized",
+        inStock: product.isActive !== false,
+        description: product.description,
+        features: [],
+      }));
+      setProducts(mappedProducts);
     } catch (error: any) {
       console.error("Error loading products:", error);
       toast({
         title: "Error",
-        description: "Failed to load products",
+        description: "Failed to load products. Using fallback data.",
         variant: "destructive",
       });
+      // Fallback to local data
+      const { products: localProducts } = await import("@/data/products");
+      setProducts(localProducts as any);
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredProducts = products.filter((product) => {
-    if (selectedCategory === "all") return true;
-    return product.category.toLowerCase().replace(" ", "-") === selectedCategory;
-  });
+  const filteredProducts = useMemo(() => {
+    return products.filter((product) => {
+      if (selectedCategory === "all") return true;
+      return product.category.toLowerCase().replace(" ", "-") === selectedCategory;
+    });
+  }, [products, selectedCategory]);
 
-  const sortedProducts = [...filteredProducts].sort((a, b) => {
-    if (sortBy === "price-low") return a.price - b.price;
-    if (sortBy === "price-high") return b.price - a.price;
-    if (sortBy === "name") return a.name.localeCompare(b.name);
-    return 0;
-  });
+  const sortedProducts = useMemo(() => {
+    return [...filteredProducts].sort((a, b) => {
+      if (sortBy === "price-low") return a.price - b.price;
+      if (sortBy === "price-high") return b.price - a.price;
+      if (sortBy === "name") return a.name.localeCompare(b.name);
+      return 0;
+    });
+  }, [filteredProducts, sortBy]);
 
   const categories = [
     { value: "all", label: "All Products" },
@@ -126,7 +139,7 @@ const Shop = () => {
                     price={product.price}
                     image={product.image}
                     category={product.category}
-                    inStock={product.in_stock}
+                    inStock={product.inStock}
                   />
                 ))}
               </div>

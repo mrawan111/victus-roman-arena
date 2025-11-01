@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, ShoppingCart, Package, TrendingUp, AlertTriangle } from "lucide-react";
+import { DollarSign, ShoppingCart, Package, AlertTriangle } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
+import { ordersAPI, productsAPI, variantsAPI } from "@/lib/api";
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -19,24 +19,29 @@ export default function AdminDashboard() {
 
   const loadDashboardStats = async () => {
     try {
-      const [ordersRes, productsRes, lowStockRes] = await Promise.all([
-        supabase.from("orders").select("total"),
-        supabase.from("products").select("id"),
-        supabase.from("products").select("id, stock_quantity, low_stock_threshold"),
+      const [ordersRes, productsRes] = await Promise.all([
+        ordersAPI.getAll().catch(() => []),
+        productsAPI.getAll(0, 100).catch(() => ({ content: [], totalElements: 0 })),
       ]);
 
-      // Filter low stock products client-side
-      const lowStockProducts = lowStockRes.data?.filter(
-        (p) => p.stock_quantity <= p.low_stock_threshold
-      ) || [];
+      const orders = Array.isArray(ordersRes) ? ordersRes : [];
+      const totalRevenue = orders.reduce((sum: number, order: any) => sum + Number(order.totalPrice || 0), 0);
+      const totalProducts = productsRes.totalElements || productsRes.content?.length || 0;
 
-      const totalRevenue = ordersRes.data?.reduce((sum, order) => sum + Number(order.total || 0), 0) || 0;
+      // Check for low stock variants
+      let lowStockCount = 0;
+      try {
+        const variants = await variantsAPI.getAll();
+        lowStockCount = variants.filter((v: any) => v.stockQuantity < 10).length;
+      } catch {
+        // Variants check failed, use 0
+      }
 
       setStats({
-        totalOrders: ordersRes.data?.length || 0,
+        totalOrders: orders.length,
         totalRevenue,
-        lowStockProducts: lowStockProducts.length,
-        totalProducts: productsRes.data?.length || 0,
+        lowStockProducts: lowStockCount,
+        totalProducts,
       });
     } catch (error) {
       console.error("Error loading dashboard stats:", error);

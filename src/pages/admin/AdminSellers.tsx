@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Plus, Mail, Phone, User } from "lucide-react";
+import { Search, Plus, Store, Star, Mail } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import {
   Table,
@@ -12,28 +12,28 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { accountsAPI } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
+import { sellersAPI } from "@/lib/api";
 
-export default function AdminCustomers() {
-  const [customers, setCustomers] = useState<any[]>([]);
+export default function AdminSellers() {
+  const [sellers, setSellers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
-    loadCustomers();
+    loadSellers();
   }, []);
 
-  const loadCustomers = async () => {
+  const loadSellers = async () => {
     try {
-      const data = await accountsAPI.getAll();
-      setCustomers(data || []);
+      const data = await sellersAPI.getAll();
+      setSellers(data || []);
     } catch (error: any) {
-      console.error("Error loading customers:", error);
+      console.error("Error loading sellers:", error);
       toast({
         title: "Error",
-        description: "Failed to load customers",
+        description: error.message || "Failed to load sellers",
         variant: "destructive",
       });
     } finally {
@@ -41,11 +41,10 @@ export default function AdminCustomers() {
     }
   };
 
-  const filteredCustomers = customers.filter(
-    (customer) =>
-      customer.email?.toLowerCase().includes(search.toLowerCase()) ||
-      customer.firstName?.toLowerCase().includes(search.toLowerCase()) ||
-      customer.lastName?.toLowerCase().includes(search.toLowerCase())
+  const filteredSellers = sellers.filter(
+    (seller) =>
+      seller.sellerName?.toLowerCase().includes(search.toLowerCase()) ||
+      seller.email?.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -53,16 +52,20 @@ export default function AdminCustomers() {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-display font-bold">Customers</h1>
-            <p className="text-muted-foreground mt-1">Manage customer information</p>
+            <h1 className="text-3xl font-display font-bold">Sellers</h1>
+            <p className="text-muted-foreground mt-1">Manage seller accounts and profiles</p>
           </div>
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Seller
+          </Button>
         </div>
 
         <Card className="p-4">
           <div className="flex items-center gap-2">
             <Search className="h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search customers by email or name..."
+              placeholder="Search sellers by name or email..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="max-w-sm"
@@ -74,11 +77,11 @@ export default function AdminCustomers() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Customer</TableHead>
+                <TableHead>Seller</TableHead>
                 <TableHead>Email</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Seller Account</TableHead>
+                <TableHead>Rating</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Created</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -86,63 +89,61 @@ export default function AdminCustomers() {
               {loading ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-8">
-                    Loading customers...
+                    Loading sellers...
                   </TableCell>
                 </TableRow>
-              ) : filteredCustomers.length === 0 ? (
+              ) : filteredSellers.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-8">
-                    No customers found
+                    <div className="flex flex-col items-center gap-4">
+                      <Store className="h-12 w-12 text-muted-foreground" />
+                      <div>
+                        <p className="text-lg font-semibold text-muted-foreground">
+                          No sellers found
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          Add seller accounts to manage seller products
+                        </p>
+                      </div>
+                    </div>
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredCustomers.map((customer) => (
-                  <TableRow key={customer.email}>
+                filteredSellers.map((seller) => (
+                  <TableRow key={seller.sellerId}>
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-2">
-                        <User className="h-4 w-4 text-muted-foreground" />
-                        <span>
-                          {customer.firstName} {customer.lastName}
-                        </span>
+                        <Store className="h-4 w-4 text-muted-foreground" />
+                        {seller.sellerName}
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Mail className="h-4 w-4 text-muted-foreground" />
-                        {customer.email}
+                        {seller.email}
                       </div>
                     </TableCell>
                     <TableCell>
-                      {customer.phoneNum ? (
-                        <div className="flex items-center gap-2">
-                          <Phone className="h-4 w-4 text-muted-foreground" />
-                          {customer.phoneNum}
-                        </div>
-                      ) : (
-                        "-"
-                      )}
+                      <div className="flex items-center gap-1">
+                        <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                        <span>{seller.rating?.toFixed(1) || "0.0"}</span>
+                      </div>
                     </TableCell>
                     <TableCell>
                       <span
                         className={`px-2 py-1 rounded-full text-xs ${
-                          customer.sellerAccount
-                            ? "bg-blue-100 text-blue-800"
-                            : "bg-gray-100 text-gray-800"
-                        }`}
-                      >
-                        {customer.sellerAccount ? "Yes" : "No"}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs ${
-                          customer.isActive !== false
+                          seller.isActive !== false
                             ? "bg-green-100 text-green-800"
                             : "bg-red-100 text-red-800"
                         }`}
                       >
-                        {customer.isActive !== false ? "Active" : "Inactive"}
+                        {seller.isActive !== false ? "Active" : "Inactive"}
                       </span>
+                    </TableCell>
+                    <TableCell>
+                      {seller.createdAt
+                        ? new Date(seller.createdAt).toLocaleDateString()
+                        : "-"}
                     </TableCell>
                     <TableCell>
                       <Button variant="ghost" size="sm">
@@ -159,3 +160,4 @@ export default function AdminCustomers() {
     </AdminLayout>
   );
 }
+

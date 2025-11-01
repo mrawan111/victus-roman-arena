@@ -1,16 +1,70 @@
 import { useParams, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { ArrowLeft, ShoppingCart, Shield, Truck, Award } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { products } from "@/data/products";
+import { productsAPI } from "@/lib/api";
 import { useCart } from "@/contexts/CartContext";
+import { useToast } from "@/hooks/use-toast";
+import { products as fallbackProducts } from "@/data/products";
 
 const ProductDetail = () => {
   const { id } = useParams();
   const { addToCart } = useCart();
-  const product = products.find((p) => p.id === id);
+  const { toast } = useToast();
+  const [product, setProduct] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadProduct();
+  }, [id]);
+
+  const loadProduct = async () => {
+    try {
+      setLoading(true);
+      const apiProduct = await productsAPI.getById(Number(id));
+      // Map API product to match our format
+      setProduct({
+        id: apiProduct.productId.toString(),
+        name: apiProduct.productName,
+        price: apiProduct.basePrice,
+        image: apiProduct.images?.[0]?.imageUrl || "/placeholder.svg",
+        category: apiProduct.category?.categoryName || "Uncategorized",
+        inStock: apiProduct.isActive !== false,
+        description: apiProduct.description || "",
+        features: [],
+      });
+    } catch (error: any) {
+      console.error("Error loading product:", error);
+      // Fallback to local data
+      const localProduct = fallbackProducts.find((p) => p.id === id);
+      if (localProduct) {
+        setProduct(localProduct);
+      } else {
+        toast({
+          title: "Error",
+          description: "Product not found",
+          variant: "destructive",
+        });
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!product) {
     return (
@@ -64,7 +118,7 @@ const ProductDetail = () => {
                   {product.name}
                 </h1>
                 <div className="flex items-center space-x-4 mb-4">
-                  <span className="text-4xl font-bold text-primary">${product.price}</span>
+                  <span className="text-4xl font-bold text-primary">${product.price?.toFixed(2) || "0.00"}</span>
                   {product.inStock ? (
                     <Badge variant="outline" className="text-green-600 border-green-600">
                       In Stock
@@ -78,20 +132,22 @@ const ProductDetail = () => {
               </div>
 
               <div className="prose max-w-none">
-                <p className="text-lg text-muted-foreground">{product.description}</p>
+                <p className="text-lg text-muted-foreground">{product.description || "No description available."}</p>
               </div>
 
-              <div>
-                <h3 className="font-display font-semibold text-xl text-primary mb-4">Features</h3>
-                <ul className="space-y-2">
-                  {product.features.map((feature, index) => (
-                    <li key={index} className="flex items-start space-x-2">
-                      <span className="text-gold mt-1">•</span>
-                      <span className="text-muted-foreground">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              {product.features && product.features.length > 0 && (
+                <div>
+                  <h3 className="font-display font-semibold text-xl text-primary mb-4">Features</h3>
+                  <ul className="space-y-2">
+                    {product.features.map((feature: string, index: number) => (
+                      <li key={index} className="flex items-start space-x-2">
+                        <span className="text-gold mt-1">•</span>
+                        <span className="text-muted-foreground">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
               <div className="space-y-4 pt-4">
                 <Button 

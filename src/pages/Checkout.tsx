@@ -7,12 +7,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { ordersAPI, cartAPI, cartProductsAPI, couponsAPI } from "@/lib/api";
+import { Tag, X } from "lucide-react";
 
 const Checkout = () => {
   const { items, totalPrice, clearCart } = useCart();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<{
+    code: string;
+    discount: number;
+    finalAmount: number;
+  } | null>(null);
+  const [validatingCoupon, setValidatingCoupon] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -32,6 +40,55 @@ const Checkout = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) {
+      toast({
+        title: "Invalid Coupon",
+        description: "Please enter a coupon code",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setValidatingCoupon(true);
+    try {
+      const result = await couponsAPI.validate(couponCode.trim().toUpperCase(), totalPrice);
+      if (result.valid) {
+        setAppliedCoupon({
+          code: result.coupon_code!,
+          discount: result.discount!,
+          finalAmount: result.final_amount!,
+        });
+        toast({
+          title: "Coupon Applied!",
+          description: `You saved $${result.discount?.toFixed(2)}`,
+        });
+        setCouponCode("");
+      } else {
+        toast({
+          title: "Invalid Coupon",
+          description: result.error || "This coupon cannot be applied",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to validate coupon",
+        variant: "destructive",
+      });
+    } finally {
+      setValidatingCoupon(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode("");
+  };
+
+  const finalTotal = appliedCoupon ? appliedCoupon.finalAmount : totalPrice;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -49,65 +106,76 @@ const Checkout = () => {
     }
 
     try {
-      // Create customer
-      const { data: customer, error: customerError } = await supabase
-        .from("customers")
-        .insert({
-          full_name: `${formData.firstName} ${formData.lastName}`,
+      // Try to get or create cart for user
+      let cartId: number | null = null;
+      try {
+        const existingCart = await cartAPI.getByEmail(formData.email);
+        cartId = existingCart.cartId;
+      } catch {
+        // Cart doesn't exist, create one
+        const newCart = await cartAPI.create({
           email: formData.email,
-          phone: formData.phone,
-          address: formData.address,
-          city: formData.city,
-          zip_code: formData.zipCode,
-          country: formData.country,
-        })
-        .select()
-        .single();
+          totalPrice: totalPrice,
+          isActive: true,
+        });
+        cartId = newCart.cartId;
+        
+        // Add items to cart
+        for (const item of items) {
+          // For now, we'll use productId as variantId - in real app, you'd get the variant
+          try {
+            await cartProductsAPI.addToCart({
+              variant_id: parseInt(item.id),
+              cart_id: cartId,
+              quantity: item.quantity,
+            });
+          } catch (err) {
+            console.error("Error adding item to cart:", err);
+          }
+        }
+      }
 
-      if (customerError) throw customerError;
-
-      // Generate order number
-      const orderNumber = `ORD-${Date.now()}`;
-
-      // Create order
-      const { data: order, error: orderError } = await supabase
-        .from("orders")
-        .insert({
-          customer_id: customer.id,
-          order_number: orderNumber,
-          subtotal: totalPrice,
-          shipping: 0,
-          tax: 0,
-          total: totalPrice,
-          status: "pending",
-          shipping_address: formData.address,
-          shipping_city: formData.city,
-          shipping_zip: formData.zipCode,
-          shipping_country: formData.country,
-        })
-        .select()
-        .single();
-
-      if (orderError) throw orderError;
-
-      // Create order items
-      const orderItems = items.map((item) => ({
-        order_id: order.id,
-        product_id: item.id,
-        product_name: item.name,
-        quantity: item.quantity,
-        price: item.price,
-      }));
-
-      const { error: itemsError } = await supabase
-        .from("order_items")
-        .insert(orderItems);
-
-      if (itemsError) throw itemsError;
+      // Create order from cart or directly
+      let order;
+      if (cartId) {
+        try {
+          const orderData = await ordersAPI.createFromCart(cartId, {
+            address: `${formData.address}, ${formData.city}, ${formData.zipCode}, ${formData.country}`,
+            phone_num: formData.phone,
+            payment_method: "Credit Card",
+            order_status: "pending",
+            payment_status: "pending",
+            clear_cart: true,
+          });
+          order = { orderId: orderData.order_id, totalPrice: orderData.total_price };
+        } catch (cartOrderError) {
+          // Fallback to direct order creation
+          order = await ordersAPI.create({
+            email: formData.email,
+            address: `${formData.address}, ${formData.city}, ${formData.zipCode}, ${formData.country}`,
+            phoneNum: formData.phone,
+            totalPrice: finalTotal,
+            orderStatus: "pending",
+            paymentStatus: "pending",
+            paymentMethod: "Credit Card",
+          });
+        }
+      } else {
+        // Direct order creation
+        order = await ordersAPI.create({
+          email: formData.email,
+          address: `${formData.address}, ${formData.city}, ${formData.zipCode}, ${formData.country}`,
+          phoneNum: formData.phone,
+          totalPrice: finalTotal,
+          orderStatus: "pending",
+          paymentStatus: "pending",
+          paymentMethod: "Credit Card",
+        });
+      }
 
       toast({
         title: "Order Placed Successfully!",
-        description: `Order ${orderNumber}. Total: $${totalPrice.toFixed(2)}`,
+        description: `Order placed. Total: $${order.totalPrice.toFixed(2)}`,
       });
 
       clearCart();
@@ -319,18 +387,75 @@ const Checkout = () => {
                         </span>
                       </div>
                     ))}
+                    
+                    {/* Coupon Code Section */}
+                    <div className="border-t pt-4 space-y-2">
+                      {appliedCoupon ? (
+                        <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+                          <div className="flex items-center gap-2">
+                            <Tag className="h-4 w-4 text-green-600" />
+                            <span className="text-sm font-semibold text-green-800">
+                              {appliedCoupon.code}
+                            </span>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleRemoveCoupon}
+                            className="h-6 w-6 p-0"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          <Label htmlFor="couponCode" className="text-sm">Coupon Code</Label>
+                          <div className="flex gap-2">
+                            <Input
+                              id="couponCode"
+                              placeholder="Enter code"
+                              value={couponCode}
+                              onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                  e.preventDefault();
+                                  handleApplyCoupon();
+                                }
+                              }}
+                              className="flex-1"
+                            />
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={handleApplyCoupon}
+                              disabled={validatingCoupon || !couponCode.trim()}
+                            >
+                              {validatingCoupon ? "..." : "Apply"}
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
                     <div className="border-t pt-4">
                       <div className="flex justify-between text-muted-foreground mb-2">
                         <span>Subtotal</span>
                         <span>${totalPrice.toFixed(2)}</span>
                       </div>
+                      {appliedCoupon && (
+                        <div className="flex justify-between text-green-600 mb-2">
+                          <span>Discount ({appliedCoupon.code})</span>
+                          <span>-${appliedCoupon.discount.toFixed(2)}</span>
+                        </div>
+                      )}
                       <div className="flex justify-between text-muted-foreground mb-2">
                         <span>Shipping</span>
                         <span>Free</span>
                       </div>
                       <div className="flex justify-between text-xl font-bold text-primary mt-4">
                         <span>Total</span>
-                        <span>${totalPrice.toFixed(2)}</span>
+                        <span>${finalTotal.toFixed(2)}</span>
                       </div>
                     </div>
                   </div>

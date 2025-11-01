@@ -1,30 +1,36 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Shield, Mail, Lock } from "lucide-react";
+import { authAPI } from "@/lib/api";
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phoneNum, setPhoneNum] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        navigate("/admin");
+    const session = localStorage.getItem("adminSession");
+    if (session) {
+      try {
+        const sessionData = JSON.parse(session);
+        if (sessionData.loggedIn && sessionData.token) {
+          navigate("/admin");
+        }
+      } catch {
+        // Invalid session
       }
-    };
-    checkSession();
+    }
   }, [navigate]);
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -33,12 +39,17 @@ export default function Auth() {
 
     try {
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
+        const response = await authAPI.login({ email, password });
 
-        if (error) throw error;
+        // Store session with token
+        localStorage.setItem("adminSession", JSON.stringify({
+          user: {
+            email: response.email,
+            sellerAccount: response.seller_account,
+          },
+          token: response.token,
+          loggedIn: true,
+        }));
 
         toast({
           title: "Welcome back!",
@@ -46,26 +57,37 @@ export default function Auth() {
         });
         navigate("/admin");
       } else {
-        const { error } = await supabase.auth.signUp({
+        const nameParts = firstName.trim().split(" ");
+        const response = await authAPI.register({
           email,
           password,
-          options: {
-            data: { full_name: fullName },
-            emailRedirectTo: `${window.location.origin}/admin`,
-          },
+          first_name: nameParts[0] || firstName,
+          last_name: nameParts.slice(1).join(" ") || lastName,
+          phone_num: phoneNum || undefined,
+          seller_account: false,
         });
 
-        if (error) throw error;
+        // Auto login after signup
+        localStorage.setItem("adminSession", JSON.stringify({
+          user: {
+            email: response.email,
+            sellerId: response.seller_id,
+          },
+          token: response.token,
+          loggedIn: true,
+        }));
 
         toast({
           title: "Account created!",
-          description: "Please check your email to verify your account.",
+          description: "Your account has been created successfully.",
         });
+        
+        navigate("/admin");
       }
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Authentication failed",
         variant: "destructive",
       });
     } finally {
@@ -88,17 +110,42 @@ export default function Auth() {
         <CardContent>
           <form onSubmit={handleAuth} className="space-y-4">
             {!isLogin && (
-              <div className="space-y-2">
-                <Label htmlFor="fullName">Full Name</Label>
-                <Input
-                  id="fullName"
-                  type="text"
-                  placeholder="John Doe"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  required={!isLogin}
-                />
-              </div>
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="firstName">First Name</Label>
+                    <Input
+                      id="firstName"
+                      type="text"
+                      placeholder="John"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      required={!isLogin}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="lastName">Last Name</Label>
+                    <Input
+                      id="lastName"
+                      type="text"
+                      placeholder="Doe"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      required={!isLogin}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phoneNum">Phone Number (Optional)</Label>
+                  <Input
+                    id="phoneNum"
+                    type="tel"
+                    placeholder="+1 (555) 123-4567"
+                    value={phoneNum}
+                    onChange={(e) => setPhoneNum(e.target.value)}
+                  />
+                </div>
+              </>
             )}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>

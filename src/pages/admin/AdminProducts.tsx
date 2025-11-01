@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useState, useMemo, useEffect } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,11 +12,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { productsAPI } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
 
 export default function AdminProducts() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const { toast } = useToast();
 
   useEffect(() => {
     loadProducts();
@@ -25,25 +27,27 @@ export default function AdminProducts() {
 
   const loadProducts = async () => {
     try {
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-      setProducts(data || []);
-    } catch (error) {
+      const response = await productsAPI.getAll(0, 100);
+      setProducts(response.content || []);
+    } catch (error: any) {
       console.error("Error loading products:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load products",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredProducts = products.filter(
-    (product) =>
-      product.name.toLowerCase().includes(search.toLowerCase()) ||
-      product.category.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredProducts = useMemo(() => {
+    return products.filter(
+      (product: any) =>
+        product.productName?.toLowerCase().includes(search.toLowerCase()) ||
+        product.category?.categoryName?.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [products, search]);
 
   return (
     <AdminLayout>
@@ -97,21 +101,21 @@ export default function AdminProducts() {
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredProducts.map((product) => (
-                  <TableRow key={product.id}>
-                    <TableCell className="font-medium">{product.name}</TableCell>
-                    <TableCell>{product.category}</TableCell>
-                    <TableCell>${product.price}</TableCell>
-                    <TableCell>{product.stock_quantity}</TableCell>
+                filteredProducts.map((product: any) => (
+                  <TableRow key={product.productId}>
+                    <TableCell className="font-medium">{product.productName}</TableCell>
+                    <TableCell>{product.category?.categoryName || "Uncategorized"}</TableCell>
+                    <TableCell>${product.basePrice?.toFixed(2) || "0.00"}</TableCell>
+                    <TableCell>-</TableCell>
                     <TableCell>
                       <span
                         className={`px-2 py-1 rounded-full text-xs ${
-                          product.in_stock
+                          product.isActive !== false
                             ? "bg-green-100 text-green-800"
                             : "bg-red-100 text-red-800"
                         }`}
                       >
-                        {product.in_stock ? "In Stock" : "Out of Stock"}
+                        {product.isActive !== false ? "Active" : "Inactive"}
                       </span>
                     </TableCell>
                     <TableCell>

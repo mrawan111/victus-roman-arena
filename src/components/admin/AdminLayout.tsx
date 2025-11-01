@@ -1,6 +1,5 @@
 import { ReactNode, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { LogOut, Menu } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -18,44 +17,37 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const { toast } = useToast();
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+    const checkAuth = () => {
+      const session = localStorage.getItem("adminSession");
       if (!session) {
         navigate("/auth");
         return;
       }
-      setUser(session.user);
-      setLoading(false);
+      
+      try {
+        const sessionData = JSON.parse(session);
+        if (sessionData.loggedIn && sessionData.token && sessionData.user) {
+          setUser(sessionData.user);
+        } else {
+          navigate("/auth");
+        }
+      } catch (error) {
+        navigate("/auth");
+      } finally {
+        setLoading(false);
+      }
     };
 
     checkAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_OUT") {
-        navigate("/auth");
-      } else if (session) {
-        setUser(session.user);
-      }
-    });
-
-    return () => subscription.unsubscribe();
   }, [navigate]);
 
-  const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to log out",
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Logged out",
-        description: "You've been successfully logged out",
-      });
-      navigate("/");
-    }
+  const handleLogout = () => {
+    localStorage.removeItem("adminSession");
+    toast({
+      title: "Logged out",
+      description: "You've been successfully logged out",
+    });
+    navigate("/");
   };
 
   if (loading) {

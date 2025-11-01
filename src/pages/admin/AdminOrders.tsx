@@ -4,17 +4,17 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, Package } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ordersAPI } from "@/lib/api";
+import { logActivity } from "@/lib/activityLogger";
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
-  const [orderItems, setOrderItems] = useState<any[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -23,20 +23,12 @@ export default function AdminOrders() {
 
   const loadOrders = async () => {
     try {
-      const { data, error } = await supabase
-        .from("orders")
-        .select(`
-          *,
-          customers (
-            full_name,
-            email,
-            phone
-          )
-        `)
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-      setOrders(data || []);
+      const data = await ordersAPI.getAll();
+      // Sort by creation date (newest first)
+      const sortedOrders = (data || []).sort((a: any, b: any) => 
+        new Date(b.orderDate || b.createdAt || 0).getTime() - new Date(a.orderDate || a.createdAt || 0).getTime()
+      );
+      setOrders(sortedOrders);
     } catch (error: any) {
       console.error("Error loading orders:", error);
       toast({
@@ -49,43 +41,34 @@ export default function AdminOrders() {
     }
   };
 
-  const loadOrderItems = async (orderId: string) => {
+  const handleViewOrder = async (order: any) => {
     try {
-      const { data, error } = await supabase
-        .from("order_items")
-        .select("*")
-        .eq("order_id", orderId);
-
-      if (error) throw error;
-      setOrderItems(data || []);
-    } catch (error: any) {
-      console.error("Error loading order items:", error);
+      const orderDetails = await ordersAPI.getById(order.orderId);
+      setSelectedOrder(orderDetails);
+    } catch (error) {
+      setSelectedOrder(order);
     }
   };
 
-  const handleViewOrder = async (order: any) => {
-    setSelectedOrder(order);
-    await loadOrderItems(order.id);
-  };
-
-  const handleStatusUpdate = async (orderId: string, newStatus: string) => {
+  const handleStatusUpdate = async (orderId: number, newStatus: string) => {
     try {
-      const { error } = await supabase
-        .from("orders")
-        .update({ status: newStatus })
-        .eq("id", orderId);
-
-      if (error) throw error;
+      await ordersAPI.update(orderId, { orderStatus: newStatus });
+      await logActivity("UPDATE", "ORDER", orderId, `Updated order #${orderId} status to: ${newStatus}`);
+      
+      // Update local state
+      const updatedOrders = orders.map((order: any) => 
+        order.orderId === orderId ? { ...order, orderStatus: newStatus } : order
+      );
+      setOrders(updatedOrders);
+      
+      if (selectedOrder?.orderId === orderId) {
+        setSelectedOrder({ ...selectedOrder, orderStatus: newStatus });
+      }
 
       toast({
         title: "Status Updated",
         description: "Order status has been updated successfully",
       });
-
-      loadOrders();
-      if (selectedOrder?.id === orderId) {
-        setSelectedOrder({ ...selectedOrder, status: newStatus });
-      }
     } catch (error: any) {
       console.error("Error updating status:", error);
       toast({
@@ -104,7 +87,7 @@ export default function AdminOrders() {
       delivered: "default",
       cancelled: "destructive",
     };
-    return <Badge variant={variants[status] || "default"}>{status}</Badge>;
+    return <Badge variant={variants[status?.toLowerCase()] || "default"}>{status || "pending"}</Badge>;
   };
 
   if (loading) {
@@ -152,18 +135,18 @@ export default function AdminOrders() {
                   </TableCell>
                 </TableRow>
               ) : (
-                orders.map((order) => (
-                  <TableRow key={order.id}>
-                    <TableCell className="font-medium">{order.order_number}</TableCell>
+                orders.map((order: any) => (
+                  <TableRow key={order.orderId}>
+                    <TableCell className="font-medium">#{order.orderId}</TableCell>
                     <TableCell>
                       <div>
-                        <div className="font-medium">{order.customers?.full_name}</div>
-                        <div className="text-sm text-muted-foreground">{order.customers?.email}</div>
+                        <div className="font-medium">{order.email}</div>
+                        <div className="text-sm text-muted-foreground">{order.phoneNum || "-"}</div>
                       </div>
                     </TableCell>
-                    <TableCell>{new Date(order.created_at).toLocaleDateString()}</TableCell>
-                    <TableCell>${Number(order.total).toFixed(2)}</TableCell>
-                    <TableCell>{getStatusBadge(order.status)}</TableCell>
+                    <TableCell>{new Date(order.orderDate || order.createdAt || Date.now()).toLocaleDateString()}</TableCell>
+                    <TableCell>${Number(order.totalPrice || 0).toFixed(2)}</TableCell>
+                    <TableCell>{getStatusBadge(order.orderStatus)}</TableCell>
                     <TableCell>
                       <Button
                         variant="ghost"
@@ -185,22 +168,19 @@ export default function AdminOrders() {
       <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrder(null)}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle>Order Details - {selectedOrder?.order_number}</DialogTitle>
+            <DialogTitle>Order Details - #{selectedOrder?.orderId}</DialogTitle>
           </DialogHeader>
           {selectedOrder && (
             <div className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <h3 className="font-semibold mb-2">Customer Information</h3>
-                  <p className="text-sm">{selectedOrder.customers?.full_name}</p>
-                  <p className="text-sm text-muted-foreground">{selectedOrder.customers?.email}</p>
-                  <p className="text-sm text-muted-foreground">{selectedOrder.customers?.phone}</p>
+                  <p className="text-sm">{selectedOrder.email}</p>
+                  <p className="text-sm text-muted-foreground">{selectedOrder.phoneNum || "-"}</p>
                 </div>
                 <div>
                   <h3 className="font-semibold mb-2">Shipping Address</h3>
-                  <p className="text-sm">{selectedOrder.shipping_address}</p>
-                  <p className="text-sm">{selectedOrder.shipping_city}, {selectedOrder.shipping_zip}</p>
-                  <p className="text-sm">{selectedOrder.shipping_country}</p>
+                  <p className="text-sm">{selectedOrder.address || "-"}</p>
                 </div>
               </div>
 
@@ -216,14 +196,22 @@ export default function AdminOrders() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {orderItems.map((item) => (
-                      <TableRow key={item.id}>
-                        <TableCell>{item.product_name}</TableCell>
-                        <TableCell>{item.quantity}</TableCell>
-                        <TableCell>${Number(item.price).toFixed(2)}</TableCell>
-                        <TableCell>${(Number(item.price) * item.quantity).toFixed(2)}</TableCell>
+                    {selectedOrder.orderItems?.length > 0 ? (
+                      selectedOrder.orderItems.map((item: any, index: number) => (
+                        <TableRow key={item.id || index}>
+                          <TableCell>{item.productName || "Product"}</TableCell>
+                          <TableCell>{item.quantity}</TableCell>
+                          <TableCell>${Number(item.price || item.priceAtTime || 0).toFixed(2)}</TableCell>
+                          <TableCell>${(Number(item.price || item.priceAtTime || 0) * item.quantity).toFixed(2)}</TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={4} className="text-center py-4 text-muted-foreground">
+                          No items found
+                        </TableCell>
                       </TableRow>
-                    ))}
+                    )}
                   </TableBody>
                 </Table>
               </div>
@@ -233,8 +221,8 @@ export default function AdminOrders() {
                   <div className="flex items-center gap-4">
                     <span className="font-semibold">Status:</span>
                     <Select
-                      value={selectedOrder.status}
-                      onValueChange={(value) => handleStatusUpdate(selectedOrder.id, value)}
+                      value={selectedOrder.orderStatus || "pending"}
+                      onValueChange={(value) => handleStatusUpdate(selectedOrder.orderId, value)}
                     >
                       <SelectTrigger className="w-[180px]">
                         <SelectValue />
@@ -250,10 +238,7 @@ export default function AdminOrders() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-muted-foreground">Subtotal: ${Number(selectedOrder.subtotal).toFixed(2)}</p>
-                  <p className="text-sm text-muted-foreground">Shipping: ${Number(selectedOrder.shipping).toFixed(2)}</p>
-                  <p className="text-sm text-muted-foreground">Tax: ${Number(selectedOrder.tax).toFixed(2)}</p>
-                  <p className="text-lg font-bold mt-2">Total: ${Number(selectedOrder.total).toFixed(2)}</p>
+                  <p className="text-lg font-bold mt-2">Total: ${Number(selectedOrder.totalPrice || 0).toFixed(2)}</p>
                 </div>
               </div>
             </div>

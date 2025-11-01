@@ -8,15 +8,23 @@ import {
   BarChart3, 
   Settings,
   FileText,
-  Warehouse
+  Warehouse,
+  Folder,
+  Store,
+  Image as ImageIcon,
+  Layers
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { to: "/admin", icon: LayoutDashboard, label: "Dashboard", end: true },
   { to: "/admin/products", icon: Package, label: "Products" },
+  { to: "/admin/categories", icon: Folder, label: "Categories" },
+  { to: "/admin/variants", icon: Layers, label: "Variants" },
+  { to: "/admin/images", icon: ImageIcon, label: "Images" },
   { to: "/admin/orders", icon: ShoppingCart, label: "Orders" },
   { to: "/admin/customers", icon: Users, label: "Customers" },
+  { to: "/admin/sellers", icon: Store, label: "Sellers" },
   { to: "/admin/inventory", icon: Warehouse, label: "Inventory" },
   { to: "/admin/coupons", icon: Tag, label: "Coupons" },
   { to: "/admin/reports", icon: BarChart3, label: "Reports" },
