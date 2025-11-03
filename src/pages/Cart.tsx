@@ -50,7 +50,7 @@ const Cart = () => {
             <div className="lg:col-span-2 space-y-4">
               {items.map((item) => (
                 <div
-                  key={item.id}
+                  key={item.variantId}
                   className="flex gap-4 p-4 rounded-lg border bg-card shadow-sm"
                 >
                   <img
@@ -73,7 +73,7 @@ const Cart = () => {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => removeFromCart(item.id)}
+                      onClick={() => removeFromCart(item.variantId)}
                     >
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
@@ -82,7 +82,7 @@ const Cart = () => {
                         variant="outline"
                         size="icon"
                         className="h-8 w-8"
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        onClick={() => updateQuantity(item.variantId, item.quantity - 1)}
                       >
                         <Minus className="h-4 w-4" />
                       </Button>
@@ -93,7 +93,7 @@ const Cart = () => {
                         variant="outline"
                         size="icon"
                         className="h-8 w-8"
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
                       >
                         <Plus className="h-4 w-4" />
                       </Button>

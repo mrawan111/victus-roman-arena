@@ -5,7 +5,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { productsAPI } from "@/lib/api";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { productsAPI, variantsAPI } from "@/lib/api";
 import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
 import { products as fallbackProducts } from "@/data/products";
@@ -15,6 +16,8 @@ const ProductDetail = () => {
   const { addToCart } = useCart();
   const { toast } = useToast();
   const [product, setProduct] = useState<any>(null);
+  const [variants, setVariants] = useState<any[]>([]);
+  const [selectedVariant, setSelectedVariant] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -36,12 +39,28 @@ const ProductDetail = () => {
         description: apiProduct.description || "",
         features: [],
       });
+
+      // Load variants for this product
+      try {
+        const productVariants = await variantsAPI.getByProductId(Number(id));
+        setVariants(productVariants);
+        if (productVariants.length > 0) {
+          setSelectedVariant(productVariants[0]);
+        }
+      } catch (variantError) {
+        console.error("Error loading variants:", variantError);
+        // If no variants, create a default one
+        setVariants([]);
+        setSelectedVariant(null);
+      }
     } catch (error: any) {
       console.error("Error loading product:", error);
       // Fallback to local data
       const localProduct = fallbackProducts.find((p) => p.id === id);
       if (localProduct) {
         setProduct(localProduct);
+        setVariants([]);
+        setSelectedVariant(null);
       } else {
         toast({
           title: "Error",
@@ -149,17 +168,61 @@ const ProductDetail = () => {
                 </div>
               )}
 
+              {/* Variant Selection */}
+              {variants.length > 0 && (
+                <div className="space-y-4 pt-4">
+                  <div>
+                    <label className="block text-sm font-medium text-primary mb-2">
+                      Select Variant
+                    </label>
+                    <Select
+                      value={selectedVariant?.variantId?.toString() || ""}
+                      onValueChange={(value) => {
+                        const variant = variants.find(v => v.variantId.toString() === value);
+                        setSelectedVariant(variant);
+                      }}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Choose a variant" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {variants.map((variant) => (
+                          <SelectItem key={variant.variantId} value={variant.variantId.toString()}>
+                            {variant.color} - {variant.size} (${variant.price})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              )}
+
               <div className="space-y-4 pt-4">
-                <Button 
+                <Button
                   className="w-full gradient-roman text-lg py-6"
-                  disabled={!product.inStock}
-                  onClick={() => addToCart({
-                    id: product.id,
-                    name: product.name,
-                    price: product.price,
-                    image: product.image,
-                    category: product.category,
-                  })}
+                  disabled={!product.inStock || (variants.length > 0 && !selectedVariant)}
+                  onClick={() => {
+                    if (selectedVariant) {
+                      addToCart({
+                        variantId: selectedVariant.variantId,
+                        productId: parseInt(product.id),
+                        name: product.name,
+                        price: selectedVariant.price,
+                        image: product.image,
+                        category: product.category,
+                        variantDetails: `${selectedVariant.color} - ${selectedVariant.size}`,
+                      });
+                    } else {
+                      addToCart({
+                        variantId: 1, // Fallback for products without variants
+                        productId: parseInt(product.id),
+                        name: product.name,
+                        price: product.price,
+                        image: product.image,
+                        category: product.category,
+                      });
+                    }
+                  }}
                 >
                   <ShoppingCart className="mr-2 h-5 w-5" />
                   {product.inStock ? "Add to Cart" : "Out of Stock"}

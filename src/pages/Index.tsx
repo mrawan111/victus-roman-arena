@@ -22,12 +22,14 @@ const Index = () => {
       const response = await productsAPI.getAll(0, 4);
       // Map API products to match ProductCard component
       const mappedProducts = response.content.map((product: any) => ({
-        id: product.productId.toString(),
+        variantId: product.variants?.[0]?.variantId || 1,
+        productId: product.productId,
         name: product.productName,
         price: product.basePrice,
         image: product.images?.[0]?.imageUrl || "/placeholder.svg",
         category: product.category?.categoryName || "Uncategorized",
         inStock: product.isActive !== false,
+        variantDetails: product.variants?.[0]?.variantDetails || "",
       }));
       setFeaturedProducts(mappedProducts);
     } catch (error) {
@@ -183,7 +185,17 @@ const Index = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               {featuredProducts.map((product) => (
-                <ProductCard key={product.id} {...product} />
+                <ProductCard
+                  key={`${product.productId}-${product.variantId}`}
+                  variantId={product.variantId}
+                  productId={product.productId}
+                  name={product.name}
+                  price={product.price}
+                  image={product.image}
+                  category={product.category}
+                  inStock={product.inStock}
+                  variantDetails={product.variantDetails}
+                />
               ))}
             </div>
           )}

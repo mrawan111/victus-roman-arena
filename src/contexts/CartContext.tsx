@@ -2,19 +2,21 @@ import { createContext, useContext, useState, ReactNode } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 export interface CartItem {
-  id: string;
+  variantId: number;
+  productId: number;
   name: string;
   price: number;
   image: string;
   quantity: number;
   category: string;
+  variantDetails?: string;
 }
 
 interface CartContextType {
   items: CartItem[];
   addToCart: (item: Omit<CartItem, "quantity">) => void;
-  removeFromCart: (id: string) => void;
-  updateQuantity: (id: string, quantity: number) => void;
+  removeFromCart: (variantId: number) => void;
+  updateQuantity: (variantId: number, quantity: number) => void;
   clearCart: () => void;
   totalItems: number;
   totalPrice: number;
@@ -28,14 +30,14 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const addToCart = (item: Omit<CartItem, "quantity">) => {
     setItems((prev) => {
-      const existing = prev.find((i) => i.id === item.id);
+      const existing = prev.find((i) => i.variantId === item.variantId);
       if (existing) {
         toast({
           title: "Updated cart",
           description: `${item.name} quantity increased`,
         });
         return prev.map((i) =>
-          i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
+          i.variantId === item.variantId ? { ...i, quantity: i.quantity + 1 } : i
         );
       }
       toast({
@@ -46,21 +48,21 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  const removeFromCart = (id: string) => {
-    setItems((prev) => prev.filter((i) => i.id !== id));
+  const removeFromCart = (variantId: number) => {
+    setItems((prev) => prev.filter((i) => i.variantId !== variantId));
     toast({
       title: "Removed from cart",
       description: "Item removed from your cart",
     });
   };
 
-  const updateQuantity = (id: string, quantity: number) => {
+  const updateQuantity = (variantId: number, quantity: number) => {
     if (quantity < 1) {
-      removeFromCart(id);
+      removeFromCart(variantId);
       return;
     }
     setItems((prev) =>
-      prev.map((i) => (i.id === id ? { ...i, quantity } : i))
+      prev.map((i) => (i.variantId === variantId ? { ...i, quantity } : i))
     );
   };
 

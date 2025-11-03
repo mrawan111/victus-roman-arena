@@ -1,9 +1,12 @@
-# TODO: Integrate GET /api/orders/with-products into Admin Panel
+# Checkout Order Details Implementation
 
-## Steps to Complete
-
-- [x] Add `getWithProducts` function to `ordersAPI` in `src/lib/api.ts`
-- [x] Update `loadOrders` in `src/pages/admin/AdminOrders.tsx` to use `ordersAPI.getWithProducts()`
-- [x] Modify order details dialog in `AdminOrders.tsx` to use embedded product details in orderItems
-- [x] Remove or adjust global loading of products/variants if no longer needed
-- [x] Test the admin panel to verify orders load with products
+## Tasks
+- [x] Modify handleSubmit in Checkout.tsx to fetch full order details after successful order creation
+- [x] Add state for order confirmation display (orderDetails, showOrderConfirmation)
+- [x] Create order confirmation UI that renders product details for each order item
+- [x] Display product name, variant details, quantity, price, and product image for each item
+- [x] Update navigation logic to show order confirmation instead of immediate redirect
+- [x] Test checkout flow to ensure order details render correctly
+- [x] Verify image loading and product information display
+- [x] Confirm stock/variant changes are reflected in order details
+ء

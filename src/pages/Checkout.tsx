@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -8,7 +8,43 @@ import { Label } from "@/components/ui/label";
 import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
 import { ordersAPI, cartAPI, cartProductsAPI, couponsAPI } from "@/lib/api";
-import { Tag, X } from "lucide-react";
+import { Tag, X, CheckCircle, Package, Truck } from "lucide-react";
+
+interface OrderItem {
+  id: number;
+  variantId: number;
+  quantity: number;
+  priceAtTime: number;
+  variant: {
+    variantId: number;
+    productId: number;
+    color: string;
+    size: string;
+    price: number;
+    product: {
+      productId: number;
+      productName: string;
+      images: Array<{
+        imageId: number;
+        imageUrl: string;
+        isPrimary: boolean;
+      }>;
+    };
+  };
+}
+
+interface OrderDetails {
+  orderId: number;
+  email: string;
+  address: string;
+  phoneNum: string;
+  totalPrice: number;
+  orderStatus: string;
+  paymentStatus: string;
+  paymentMethod: string;
+  orderDate: string;
+  orderItems: OrderItem[];
+}
 
 const Checkout = () => {
   const { items, totalPrice, clearCart } = useCart();
@@ -21,6 +57,8 @@ const Checkout = () => {
     finalAmount: number;
   } | null>(null);
   const [validatingCoupon, setValidatingCoupon] = useState(false);
+  const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
+  const [showOrderConfirmation, setShowOrderConfirmation] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -35,6 +73,12 @@ const Checkout = () => {
     expiryDate: "",
     cvv: "",
   });
+
+  useEffect(() => {
+    if (items.length === 0) {
+      navigate("/cart");
+    }
+  }, [items.length, navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -122,10 +166,9 @@ const Checkout = () => {
         
         // Add items to cart
         for (const item of items) {
-          // For now, we'll use productId as variantId - in real app, you'd get the variant
           try {
             await cartProductsAPI.addToCart({
-              variant_id: parseInt(item.id),
+              variant_id: item.variantId,
               cart_id: cartId,
               quantity: item.quantity,
             });
@@ -133,6 +176,9 @@ const Checkout = () => {
             console.error("Error adding item to cart:", err);
           }
         }
+
+        // Recalculate cart total after adding items
+        await cartAPI.calculateTotal(cartId);
       }
 
       // Create order from cart or directly
@@ -173,13 +219,17 @@ const Checkout = () => {
         });
       }
 
+      // Fetch full order details immediately after creation
+      const fullOrderDetails = await ordersAPI.getById(order.orderId);
+      setOrderDetails(fullOrderDetails);
+      setShowOrderConfirmation(true);
+
       toast({
         title: "Order Placed Successfully!",
-        description: `Order placed. Total: $${order.totalPrice.toFixed(2)}`,
+        description: `Order #${order.orderId} placed. Total: $${order.totalPrice.toFixed(2)}`,
       });
 
       clearCart();
-      setTimeout(() => navigate("/"), 2000);
     } catch (error: any) {
       console.error("Error placing order:", error);
       toast({
@@ -190,10 +240,7 @@ const Checkout = () => {
     }
   };
 
-  if (items.length === 0) {
-    navigate("/cart");
-    return null;
-  }
+
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -378,9 +425,9 @@ const Checkout = () => {
                   </h2>
                   <div className="space-y-4 mb-6">
                     {items.map((item) => (
-                      <div key={item.id} className="flex justify-between text-sm">
+                      <div key={item.variantId} className="flex justify-between text-sm">
                         <span className="text-muted-foreground">
-                          {item.name} x{item.quantity}
+                          {item.name} {item.variantDetails ? `(${item.variantDetails})` : ''} x{item.quantity}
                         </span>
                         <span className="font-semibold">
                           ${(item.price * item.quantity).toFixed(2)}
@@ -468,6 +515,102 @@ const Checkout = () => {
           </form>
         </div>
       </section>
+
+      {/* Order Confirmation Modal */}
+      {showOrderConfirmation && orderDetails && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-center mb-6">
+                <CheckCircle className="h-16 w-16 text-green-500" />
+              </div>
+              <h2 className="text-3xl font-display font-bold text-center text-primary mb-2">
+                Order Confirmed!
+              </h2>
+              <p className="text-center text-muted-foreground mb-6">
+                Thank you for your purchase. Your order has been placed successfully.
+              </p>
+
+              <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                <div className="flex items-center gap-2 mb-2">
+                  <Package className="h-5 w-5 text-primary" />
+                  <span className="font-semibold">Order #{orderDetails.orderId}</span>
+                </div>
+                <div className="text-sm text-muted-foreground space-y-1">
+                  <p>Order Date: {new Date(orderDetails.orderDate).toLocaleDateString()}</p>
+                  <p>Status: {orderDetails.orderStatus}</p>
+                  <p>Payment: {orderDetails.paymentStatus} ({orderDetails.paymentMethod})</p>
+                </div>
+              </div>
+
+              <div className="space-y-4 mb-6">
+                <h3 className="text-xl font-semibold">Order Items</h3>
+                {orderDetails.orderItems.map((item) => {
+                  const primaryImage = item.variant?.product?.images?.find(img => img.isPrimary) || item.variant?.product?.images?.[0];
+                  return (
+                    <div key={item.id} className="flex items-center gap-4 p-4 border rounded-lg bg-white">
+                      <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                        {primaryImage ? (
+                          <img
+                            src={primaryImage.imageUrl}
+                            alt={item.variant?.product?.productName || "Product"}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                            <Package className="h-6 w-6 text-gray-400" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold">{item.variant?.product?.productName || "Product"}</h4>
+                        <p className="text-sm text-muted-foreground">
+                          {item.variant?.color || "N/A"} / {item.variant?.size || "N/A"}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          Quantity: {item.quantity}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold">${item.priceAtTime.toFixed(2)}</p>
+                        <p className="text-sm text-muted-foreground">
+                          ${(item.priceAtTime * item.quantity).toFixed(2)}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="border-t pt-4">
+                <div className="flex justify-between items-center text-lg font-semibold">
+                  <span>Total:</span>
+                  <span>${orderDetails.totalPrice.toFixed(2)}</span>
+                </div>
+              </div>
+
+              <div className="flex gap-4 mt-6">
+                <Button
+                  onClick={() => navigate("/")}
+                  className="flex-1 gradient-roman"
+                >
+                  Continue Shopping
+                </Button>
+                <Button
+                  onClick={() => {
+                    setShowOrderConfirmation(false);
+                    setOrderDetails(null);
+                  }}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>

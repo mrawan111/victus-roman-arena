@@ -98,10 +98,10 @@ export default function AdminVariants() {
     if (!confirm("Are you sure you want to delete this variant?")) return;
 
     try {
-      // Note: Delete variant API would need to be added to api.ts
+      await variantsAPI.delete(id);
       toast({
-        title: "Info",
-        description: "Delete functionality needs API endpoint implementation",
+        title: "Success",
+        description: "Variant deleted successfully",
       });
       loadData();
     } catch (error: any) {
@@ -115,12 +115,41 @@ export default function AdminVariants() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Note: Create/Update variant API would need to be added to api.ts
-    toast({
-      title: "Info",
-      description: "Create/Update functionality needs API endpoint implementation",
-    });
-    setIsDialogOpen(false);
+
+    try {
+      const data = {
+        productId: parseInt(formData.productId),
+        color: formData.color || undefined,
+        size: formData.size || undefined,
+        stockQuantity: parseInt(formData.stockQuantity),
+        price: parseFloat(formData.price),
+        sku: formData.sku || undefined,
+        isActive: formData.isActive,
+      };
+
+      if (editingVariant) {
+        await variantsAPI.update(editingVariant.variantId, data);
+        toast({
+          title: "Success",
+          description: "Variant updated successfully",
+        });
+      } else {
+        await variantsAPI.create(data);
+        toast({
+          title: "Success",
+          description: "Variant created successfully",
+        });
+      }
+
+      setIsDialogOpen(false);
+      loadData();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save variant",
+        variant: "destructive",
+      });
+    }
   };
 
   const filteredVariants = variants.filter((variant) => {

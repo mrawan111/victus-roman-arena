@@ -4,22 +4,35 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/contexts/CartContext";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface ProductCardProps {
-  id: string;
+  variantId: number;
+  productId: number;
   name: string;
   price: number;
   image: string;
   category: string;
   inStock?: boolean;
+  variantDetails?: string;
 }
 
-const ProductCard = ({ id, name, price, image, category, inStock = true }: ProductCardProps) => {
+const ProductCard = ({ variantId, productId, name, price, image, category, inStock = true, variantDetails }: ProductCardProps) => {
   const { addToCart } = useCart();
   
   return (
     <Card className="group overflow-hidden shadow-elegant hover:shadow-gold transition-all duration-300 hover:-translate-y-1">
-      <Link to={`/product/${id}`}>
+      <Link to={`/product/${productId}`}>
         <div className="relative overflow-hidden aspect-square bg-marble">
           <img
             src={image}
@@ -38,7 +51,7 @@ const ProductCard = ({ id, name, price, image, category, inStock = true }: Produ
       </Link>
       
       <CardContent className="p-4">
-        <Link to={`/product/${id}`}>
+        <Link to={`/product/${productId}`}>
           <h3 className="font-display font-semibold text-lg text-primary group-hover:text-gold transition-colors">
             {name}
           </h3>
@@ -49,17 +62,39 @@ const ProductCard = ({ id, name, price, image, category, inStock = true }: Produ
       </CardContent>
       
       <CardFooter className="p-4 pt-0">
-        <Button 
-          className="w-full gradient-roman hover:opacity-90 transition-opacity"
-          disabled={!inStock}
-          onClick={(e) => {
-            e.preventDefault();
-            addToCart({ id, name, price, image, category });
-          }}
-        >
-          <ShoppingCart className="mr-2 h-4 w-4" />
-          {inStock ? "Add to Cart" : "Out of Stock"}
-        </Button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button
+              className="w-full gradient-roman hover:opacity-90 transition-opacity"
+              disabled={!inStock}
+            >
+              <ShoppingCart className="mr-2 h-4 w-4" />
+              {inStock ? "Add to Cart" : "Out of Stock"}
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirm Add to Cart</AlertDialogTitle>
+              <AlertDialogDescription className="space-y-2">
+                <strong>Product:</strong> {name}<br />
+                <strong>Price:</strong> ${price}<br />
+                {variantDetails && <><strong>Variant:</strong> {variantDetails}<br /></>}
+                <strong>Category:</strong> {category}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={(e) => {
+                  e.preventDefault();
+                  addToCart({ variantId, productId, name, price, image, category, variantDetails });
+                }}
+              >
+                Confirm Add to Cart
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </CardFooter>
     </Card>
   );

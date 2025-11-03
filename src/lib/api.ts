@@ -253,6 +253,36 @@ export const variantsAPI = {
   getByProductId: async (productId: number) => apiRequest<any[]>(`/variants/product/${productId}`),
 
   checkAvailability: async (id: number) => apiRequest<any>(`/variants/${id}/check-availability`),
+
+  create: async (data: {
+    productId: number;
+    color?: string;
+    size?: string;
+    stockQuantity: number;
+    price: number;
+    sku?: string;
+    isActive?: boolean;
+  }) =>
+    apiRequest<any>("/variants", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  update: async (id: number, data: {
+    productId?: number;
+    color?: string;
+    size?: string;
+    stockQuantity?: number;
+    price?: number;
+    sku?: string;
+    isActive?: boolean;
+  }) =>
+    apiRequest<any>(`/variants/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+
+  delete: async (id: number) => apiRequest<{ message: string }>(`/variants/${id}`, { method: "DELETE" }),
 };
 
 // Images API
