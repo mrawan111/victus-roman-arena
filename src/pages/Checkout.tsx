@@ -246,9 +246,9 @@ const Checkout = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
 
-      <section className="py-16 gradient-roman">
+      <section className="py-12 sm:py-16 gradient-roman">
         <div className="container mx-auto px-4">
-          <h1 className="text-4xl md:text-5xl font-display font-bold text-white mb-4 text-center">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold text-white mb-3 sm:mb-4 text-center">
             Checkout
           </h1>
         </div>
@@ -261,11 +261,11 @@ const Checkout = () => {
               {/* Checkout Form */}
               <div className="lg:col-span-2 space-y-8">
                 {/* Contact Information */}
-                <div className="p-6 rounded-lg border bg-card shadow-sm">
-                  <h2 className="text-2xl font-display font-bold text-primary mb-6">
+                <div className="p-4 sm:p-6 rounded-lg border bg-card shadow-sm">
+                  <h2 className="text-xl sm:text-2xl font-display font-bold text-primary mb-4 sm:mb-6">
                     Contact Information
                   </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="firstName">First Name</Label>
                       <Input
@@ -312,8 +312,8 @@ const Checkout = () => {
                 </div>
 
                 {/* Shipping Address */}
-                <div className="p-6 rounded-lg border bg-card shadow-sm">
-                  <h2 className="text-2xl font-display font-bold text-primary mb-6">
+                <div className="p-4 sm:p-6 rounded-lg border bg-card shadow-sm">
+                  <h2 className="text-xl sm:text-2xl font-display font-bold text-primary mb-4 sm:mb-6">
                     Shipping Address
                   </h2>
                   <div className="space-y-4">
@@ -327,7 +327,7 @@ const Checkout = () => {
                         required
                       />
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       <div>
                         <Label htmlFor="city">City</Label>
                         <Input
@@ -363,8 +363,8 @@ const Checkout = () => {
                 </div>
 
                 {/* Payment Information */}
-                <div className="p-6 rounded-lg border bg-card shadow-sm">
-                  <h2 className="text-2xl font-display font-bold text-primary mb-6">
+                <div className="p-4 sm:p-6 rounded-lg border bg-card shadow-sm">
+                  <h2 className="text-xl sm:text-2xl font-display font-bold text-primary mb-4 sm:mb-6">
                     Payment Information
                   </h2>
                   <div className="space-y-4">
@@ -389,7 +389,7 @@ const Checkout = () => {
                         required
                       />
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="expiryDate">Expiry Date</Label>
                         <Input
@@ -419,8 +419,8 @@ const Checkout = () => {
 
               {/* Order Summary */}
               <div className="lg:col-span-1">
-                <div className="p-6 rounded-lg border bg-card shadow-elegant sticky top-24">
-                  <h2 className="text-2xl font-display font-bold text-primary mb-6">
+                <div className="p-4 sm:p-6 rounded-lg border bg-card shadow-elegant lg:sticky lg:top-24">
+                  <h2 className="text-xl sm:text-2xl font-display font-bold text-primary mb-4 sm:mb-6">
                     Order Summary
                   </h2>
                   <div className="space-y-4 mb-6">
@@ -520,14 +520,14 @@ const Checkout = () => {
       {showOrderConfirmation && orderDetails && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
+            <div className="p-4 sm:p-6">
               <div className="flex items-center justify-center mb-6">
                 <CheckCircle className="h-16 w-16 text-green-500" />
               </div>
-              <h2 className="text-3xl font-display font-bold text-center text-primary mb-2">
+              <h2 className="text-2xl sm:text-3xl font-display font-bold text-center text-primary mb-2">
                 Order Confirmed!
               </h2>
-              <p className="text-center text-muted-foreground mb-6">
+              <p className="text-center text-sm sm:text-base text-muted-foreground mb-6">
                 Thank you for your purchase. Your order has been placed successfully.
               </p>
 
@@ -589,7 +589,7 @@ const Checkout = () => {
                 </div>
               </div>
 
-              <div className="flex gap-4 mt-6">
+              <div className="flex flex-col sm:flex-row gap-4 mt-6">
                 <Button
                   onClick={() => navigate("/")}
                   className="flex-1 gradient-roman"

@@ -37,13 +37,13 @@ const Contact = () => {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="py-20 gradient-roman">
+      <section className="py-12 sm:py-16 md:py-20 gradient-roman">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl md:text-6xl font-display font-bold text-white mb-6">
+            <h1 className="text-3xl sm:text-4xl md:text-6xl font-display font-bold text-white mb-4 sm:mb-6">
               Get In Touch
             </h1>
-            <p className="text-xl text-white/90">
+            <p className="text-base sm:text-lg md:text-xl text-white/90 px-4">
               Have questions about our equipment? We're here to help you find the perfect gear.
             </p>
           </div>
@@ -51,16 +51,16 @@ const Contact = () => {
       </section>
 
       {/* Contact Section */}
-      <section className="py-20">
+      <section className="py-12 sm:py-16 md:py-20">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 sm:gap-12">
             {/* Contact Info */}
-            <div className="space-y-8">
+            <div className="space-y-6 sm:space-y-8">
               <div>
-                <h2 className="text-3xl font-display font-bold text-primary mb-6">
+                <h2 className="text-2xl sm:text-3xl font-display font-bold text-primary mb-4 sm:mb-6">
                   Contact Information
                 </h2>
-                <p className="text-muted-foreground mb-8">
+                <p className="text-sm sm:text-base text-muted-foreground mb-6 sm:mb-8">
                   Reach out to our team for any inquiries about products, orders, or partnerships.
                 </p>
               </div>
@@ -106,8 +106,8 @@ const Contact = () => {
 
             {/* Contact Form */}
             <div className="lg:col-span-2">
-              <form onSubmit={handleSubmit} className="space-y-6 p-8 rounded-lg bg-marble shadow-elegant">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <form onSubmit={handleSubmit} className="space-y-6 p-4 sm:p-6 lg:p-8 rounded-lg bg-marble shadow-elegant">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   <div>
                     <label htmlFor="name" className="block text-sm font-semibold text-primary mb-2">
                       Name *
@@ -170,8 +170,8 @@ const Contact = () => {
                   />
                 </div>
 
-                <Button type="submit" className="w-full gradient-roman text-lg py-6">
-                  <Send className="mr-2 h-5 w-5" />
+                <Button type="submit" className="w-full gradient-roman text-base sm:text-lg py-4 sm:py-6">
+                  <Send className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                   Send Message
                 </Button>
               </form>

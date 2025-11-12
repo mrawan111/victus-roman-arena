@@ -115,7 +115,7 @@ const ProductDetail = () => {
             </Link>
           </Button>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
             {/* Product Image */}
             <div className="relative">
               <div className="aspect-square rounded-lg overflow-hidden bg-marble shadow-elegant">
@@ -125,25 +125,25 @@ const ProductDetail = () => {
                   className="w-full h-full object-cover"
                 />
               </div>
-              <Badge className="absolute top-4 left-4 bg-gold text-primary font-semibold">
+              <Badge className="absolute top-4 left-4 bg-gold text-primary font-semibold text-xs sm:text-sm">
                 {product.category}
               </Badge>
             </div>
 
             {/* Product Info */}
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               <div>
-                <h1 className="text-4xl font-display font-bold text-primary mb-4">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-display font-bold text-primary mb-4">
                   {product.name}
                 </h1>
-                <div className="flex items-center space-x-4 mb-4">
-                  <span className="text-4xl font-bold text-primary">${product.price?.toFixed(2) || "0.00"}</span>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-4">
+                  <span className="text-3xl sm:text-4xl font-bold text-primary">${product.price?.toFixed(2) || "0.00"}</span>
                   {product.inStock ? (
-                    <Badge variant="outline" className="text-green-600 border-green-600">
+                    <Badge variant="outline" className="text-green-600 border-green-600 w-fit">
                       In Stock
                     </Badge>
                   ) : (
-                    <Badge variant="outline" className="text-red-600 border-red-600">
+                    <Badge variant="outline" className="text-red-600 border-red-600 w-fit">
                       Out of Stock
                     </Badge>
                   )}
@@ -230,7 +230,7 @@ const ProductDetail = () => {
               </div>
 
               {/* Additional Info */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-6 border-t">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 border-t">
                 <div className="flex items-start space-x-3">
                   <Shield className="h-5 w-5 text-gold flex-shrink-0 mt-1" />
                   <div>

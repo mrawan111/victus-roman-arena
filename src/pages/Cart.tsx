@@ -35,9 +35,9 @@ const Cart = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
 
-      <section className="py-16 gradient-roman">
+      <section className="py-12 sm:py-16 gradient-roman">
         <div className="container mx-auto px-4">
-          <h1 className="text-4xl md:text-5xl font-display font-bold text-white mb-4 text-center">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold text-white mb-3 sm:mb-4 text-center">
             Shopping Cart
           </h1>
         </div>
@@ -51,52 +51,55 @@ const Cart = () => {
               {items.map((item) => (
                 <div
                   key={item.variantId}
-                  className="flex gap-4 p-4 rounded-lg border bg-card shadow-sm"
+                  className="flex flex-col sm:flex-row gap-4 p-4 rounded-lg border bg-card shadow-sm"
                 >
                   <img
                     src={item.image}
                     alt={item.name}
-                    className="w-24 h-24 object-cover rounded-md"
+                    className="w-full sm:w-24 h-48 sm:h-24 object-cover rounded-md"
                   />
-                  <div className="flex-1">
-                    <h3 className="font-display font-semibold text-lg text-primary">
-                      {item.name}
-                    </h3>
-                    <p className="text-sm text-muted-foreground mb-2">
-                      {item.category}
-                    </p>
-                    <p className="text-xl font-bold text-primary">
-                      ${item.price.toFixed(2)}
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end justify-between">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeFromCart(item.variantId)}
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                    <div className="flex items-center gap-2">
+                  <div className="flex-1 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="flex-1">
+                      <h3 className="font-display font-semibold text-base sm:text-lg text-primary">
+                        {item.name}
+                      </h3>
+                      <p className="text-sm text-muted-foreground mb-2">
+                        {item.category}
+                      </p>
+                      <p className="text-lg sm:text-xl font-bold text-primary">
+                        ${item.price.toFixed(2)}
+                      </p>
+                    </div>
+                    <div className="flex items-center justify-between sm:flex-col sm:items-end sm:justify-between gap-2">
                       <Button
-                        variant="outline"
+                        variant="ghost"
                         size="icon"
-                        className="h-8 w-8"
-                        onClick={() => updateQuantity(item.variantId, item.quantity - 1)}
+                        onClick={() => removeFromCart(item.variantId)}
+                        className="sm:self-end"
                       >
-                        <Minus className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
-                      <span className="w-8 text-center font-semibold">
-                        {item.quantity}
-                      </span>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
-                      >
-                        <Plus className="h-4 w-4" />
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => updateQuantity(item.variantId, item.quantity - 1)}
+                        >
+                          <Minus className="h-4 w-4" />
+                        </Button>
+                        <span className="w-8 text-center font-semibold">
+                          {item.quantity}
+                        </span>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -105,7 +108,7 @@ const Cart = () => {
 
             {/* Order Summary */}
             <div className="lg:col-span-1">
-              <div className="p-6 rounded-lg border bg-card shadow-elegant sticky top-24">
+              <div className="p-4 sm:p-6 rounded-lg border bg-card shadow-elegant lg:sticky lg:top-24">
                 <h2 className="text-2xl font-display font-bold text-primary mb-6">
                   Order Summary
                 </h2>

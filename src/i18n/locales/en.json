@@ -1,0 +1,78 @@
+{
+  "nav": {
+    "home": "Home",
+    "shop": "Shop",
+    "about": "About",
+    "contact": "Contact",
+    "account": "Account",
+    "myAccount": "My Account",
+    "myOrders": "My Orders",
+    "logout": "Logout",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "cart": "Cart"
+  },
+  "hero": {
+    "tagline": "STRENGTH • HONOR • VICTORY",
+    "title": "Fight Like a",
+    "titleHighlight": "Gladiator",
+    "subtitle": "Premium martial arts equipment crafted with the precision of ancient Roman warriors. Dominate your discipline with Victus.",
+    "shopAll": "Shop All Equipment",
+    "learnStory": "Learn Our Story"
+  },
+  "features": {
+    "premiumQuality": {
+      "title": "Premium Quality",
+      "description": "Built to last with the finest materials, inspired by legendary craftsmanship."
+    },
+    "championApproved": {
+      "title": "Champion Approved",
+      "description": "Trusted by professional fighters and martial artists worldwide."
+    },
+    "fastShipping": {
+      "title": "Fast Shipping",
+      "description": "Free shipping on orders over $100. Get equipped quickly."
+    }
+  },
+  "categories": {
+    "title": "Choose Your Discipline",
+    "subtitle": "From the ancient arenas to modern combat sports, find equipment for every martial art.",
+    "boxing": "Boxing",
+    "mma": "MMA",
+    "muayThai": "Muay Thai",
+    "kickboxing": "Kickboxing"
+  },
+  "products": {
+    "featured": {
+      "title": "Featured Equipment",
+      "subtitle": "Our most popular gear, chosen by warriors worldwide.",
+      "viewAll": "View All Products"
+    }
+  },
+  "cta": {
+    "title": "Join the Legion of Champions",
+    "subtitle": "Gear up with equipment that's built for victory. Start your journey to greatness today.",
+    "startShopping": "Start Shopping"
+  },
+  "shop": {
+    "title": "Equipment Arsenal",
+    "subtitle": "Discover our complete collection of professional martial arts equipment",
+    "allProducts": "All Products",
+    "sortBy": "Sort by",
+    "featured": "Featured",
+    "priceLow": "Price: Low to High",
+    "priceHigh": "Price: High to Low",
+    "nameAZ": "Name: A to Z",
+    "noProducts": "No products found in this category."
+  },
+  "auth": {
+    "loggedOut": "Logged out",
+    "loggedOutDesc": "You've been successfully logged out"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "failedToLoad": "Failed to load products. Using fallback data."
+  }
+}
+

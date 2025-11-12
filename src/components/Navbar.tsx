@@ -13,6 +13,8 @@ import {
 import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import victusLogo from "@/assets/victus-logo.png";
 
 const Navbar = () => {
@@ -21,6 +23,7 @@ const Navbar = () => {
   const [user, setUser] = useState<any>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   useEffect(() => {
     checkAuthStatus();
@@ -46,16 +49,16 @@ const Navbar = () => {
     setIsLoggedIn(false);
     setUser(null);
     toast({
-      title: "Logged out",
-      description: "You've been successfully logged out",
+      title: t("auth.loggedOut"),
+      description: t("auth.loggedOutDesc"),
     });
     navigate("/");
   };
   const navLinks = [
-    { name: "Home", path: "/" },
-    { name: "Shop", path: "/shop" },
-    { name: "About", path: "/about" },
-    { name: "Contact", path: "/contact" },
+    { name: t("nav.home"), path: "/" },
+    { name: t("nav.shop"), path: "/shop" },
+    { name: t("nav.about"), path: "/about" },
+    { name: t("nav.contact"), path: "/contact" },
   ];
 
   return (
@@ -89,35 +92,37 @@ const Navbar = () => {
             {isLoggedIn ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-2">
+                    <Button variant="outline" size="sm" className="gap-2">
                     <User className="h-4 w-4" />
-                    {user?.firstName || user?.email || "Account"}
+                    {user?.firstName || user?.email || t("nav.account")}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem asChild>
-                    <Link to="/">My Account</Link>
+                    <Link to="/">{t("nav.myAccount")}</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/orders">My Orders</Link>
+                    <Link to="/orders">{t("nav.myOrders")}</Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="mr-2 h-4 w-4" />
-                    Logout
+                    {t("nav.logout")}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
               <div className="flex items-center gap-2">
                 <Button asChild variant="ghost" size="sm">
-                  <Link to="/login">Sign In</Link>
+                  <Link to="/login">{t("nav.signIn")}</Link>
                 </Button>
                 <Button asChild variant="default" size="sm" className="gradient-roman">
-                  <Link to="/signup">Sign Up</Link>
+                  <Link to="/signup">{t("nav.signUp")}</Link>
                 </Button>
               </div>
             )}
+            
+            <LanguageSwitcher />
             
             <Button asChild variant="default" size="icon" className="relative gradient-roman">
               <Link to="/cart">
@@ -153,7 +158,7 @@ const Navbar = () => {
                   {isLoggedIn ? (
                     <div className="space-y-2">
                       <p className="text-sm text-muted-foreground">
-                        {user?.firstName || user?.email || "User"}
+                        {user?.firstName || user?.email || t("nav.account")}
                       </p>
                       <Button
                         variant="outline"
@@ -161,7 +166,7 @@ const Navbar = () => {
                         onClick={handleLogout}
                       >
                         <LogOut className="mr-2 h-4 w-4" />
-                        Logout
+                        {t("nav.logout")}
                       </Button>
                     </div>
                   ) : (
@@ -169,11 +174,11 @@ const Navbar = () => {
                       <Button asChild variant="ghost" className="w-full">
                         <Link to="/login">
                           <User className="mr-2 h-4 w-4" />
-                          Sign In
+                          {t("nav.signIn")}
                         </Link>
                       </Button>
                       <Button asChild variant="default" className="w-full gradient-roman">
-                        <Link to="/signup">Sign Up</Link>
+                        <Link to="/signup">{t("nav.signUp")}</Link>
                       </Button>
                     </div>
                   )}
@@ -181,7 +186,7 @@ const Navbar = () => {
                 <Button asChild variant="default" className="w-full gradient-roman">
                   <Link to="/cart">
                     <ShoppingCart className="mr-2 h-5 w-5" />
-                    Cart ({totalItems})
+                    {t("nav.cart")} ({totalItems})
                   </Link>
                 </Button>
               </div>

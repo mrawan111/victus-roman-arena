@@ -1,16 +1,36 @@
+// API Base URL - defaults to localhost:8080/api
+// Can be overridden by setting VITE_API_BASE_URL in .env file
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
+
+// Log API base URL in development for debugging
+if (import.meta.env.DEV) {
+  console.log("API Base URL:", API_BASE_URL);
+}
 
 // Helper function to get auth token from localStorage
 const getAuthToken = (): string | null => {
-  const session = localStorage.getItem("adminSession");
-  if (session) {
+  // Check for admin session first
+  const adminSession = localStorage.getItem("adminSession");
+  if (adminSession) {
     try {
-      const sessionData = JSON.parse(session);
+      const sessionData = JSON.parse(adminSession);
+      return sessionData.token || null;
+    } catch {
+      // Invalid session, continue to check user session
+    }
+  }
+  
+  // Check for user session
+  const userSession = localStorage.getItem("userSession");
+  if (userSession) {
+    try {
+      const sessionData = JSON.parse(userSession);
       return sessionData.token || null;
     } catch {
       return null;
     }
   }
+  
   return null;
 };
 
@@ -29,17 +49,26 @@ const apiRequest = async <T>(
     headers.Authorization = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    ...options,
-    headers,
-  });
+  try {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      ...options,
+      headers,
+    });
 
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: response.statusText }));
-    throw new Error(error.message || `HTTP error! status: ${response.status}`);
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: response.statusText }));
+      throw new Error(error.message || `HTTP error! status: ${response.status}`);
+    }
+
+    return response.json();
+  } catch (error: any) {
+    // Enhanced error handling for network issues
+    if (error instanceof TypeError && error.message.includes("fetch")) {
+      console.error(`Failed to connect to API at ${API_BASE_URL}${endpoint}`);
+      throw new Error(`Unable to connect to server. Please ensure the backend is running on ${API_BASE_URL}`);
+    }
+    throw error;
   }
-
-  return response.json();
 };
 
 // Authentication API

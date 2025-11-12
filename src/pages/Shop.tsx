@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { productsAPI } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 const Shop = () => {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const categoryParam = searchParams.get("category");
   const [selectedCategory, setSelectedCategory] = useState<string>(categoryParam || "all");
@@ -42,8 +44,8 @@ const Shop = () => {
     } catch (error: any) {
       console.error("Error loading products:", error);
       toast({
-        title: "Error",
-        description: "Failed to load products. Using fallback data.",
+        title: t("common.error"),
+        description: t("common.failedToLoad"),
         variant: "destructive",
       });
       // Fallback to local data
@@ -71,11 +73,11 @@ const Shop = () => {
   }, [filteredProducts, sortBy]);
 
   const categories = [
-    { value: "all", label: "All Products" },
-    { value: "boxing", label: "Boxing" },
-    { value: "mma", label: "MMA" },
-    { value: "muay-thai", label: "Muay Thai" },
-    { value: "kickboxing", label: "Kickboxing" },
+    { value: "all", label: t("shop.allProducts") },
+    { value: "boxing", label: t("categories.boxing") },
+    { value: "mma", label: t("categories.mma") },
+    { value: "muay-thai", label: t("categories.muayThai") },
+    { value: "kickboxing", label: t("categories.kickboxing") },
   ];
 
   return (
@@ -83,13 +85,13 @@ const Shop = () => {
       <Navbar />
 
       {/* Page Header */}
-      <section className="py-16 gradient-roman">
+      <section className="py-12 sm:py-16 gradient-roman">
         <div className="container mx-auto px-4">
-          <h1 className="text-4xl md:text-5xl font-display font-bold text-white mb-4 text-center">
-            Equipment Arsenal
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold text-white mb-3 sm:mb-4 text-center">
+            {t("shop.title")}
           </h1>
-          <p className="text-xl text-white/90 text-center max-w-2xl mx-auto">
-            Discover our complete collection of professional martial arts equipment
+          <p className="text-base sm:text-lg md:text-xl text-white/90 text-center max-w-2xl mx-auto px-4">
+            {t("shop.subtitle")}
           </p>
         </div>
       </section>
@@ -114,13 +116,13 @@ const Shop = () => {
 
             <Select value={sortBy} onValueChange={setSortBy}>
               <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Sort by" />
+                <SelectValue placeholder={t("shop.sortBy")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="featured">Featured</SelectItem>
-                <SelectItem value="price-low">Price: Low to High</SelectItem>
-                <SelectItem value="price-high">Price: High to Low</SelectItem>
-                <SelectItem value="name">Name: A to Z</SelectItem>
+                <SelectItem value="featured">{t("shop.featured")}</SelectItem>
+                <SelectItem value="price-low">{t("shop.priceLow")}</SelectItem>
+                <SelectItem value="price-high">{t("shop.priceHigh")}</SelectItem>
+                <SelectItem value="name">{t("shop.nameAZ")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -150,7 +152,7 @@ const Shop = () => {
 
               {sortedProducts.length === 0 && (
                 <div className="text-center py-20">
-                  <p className="text-xl text-muted-foreground">No products found in this category.</p>
+                  <p className="text-xl text-muted-foreground">{t("shop.noProducts")}</p>
                 </div>
               )}
             </>

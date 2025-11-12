@@ -7,9 +7,11 @@ import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 import { productsAPI } from "@/lib/api";
 import { products as fallbackProducts } from "@/data/products";
+import { useTranslation } from "react-i18next";
 import heroImage from "@/assets/hero-martial-arts.jpg";
 
 const Index = () => {
+  const { t } = useTranslation();
   const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -41,10 +43,10 @@ const Index = () => {
     }
   };
   const categories = [
-    { name: "Boxing", slug: "boxing", icon: "🥊" },
-    { name: "MMA", slug: "mma", icon: "🥋" },
-    { name: "Muay Thai", slug: "muay-thai", icon: "🥷" },
-    { name: "Kickboxing", slug: "kickboxing", icon: "👊" },
+    { name: t("categories.boxing"), slug: "boxing", icon: "🥊" },
+    { name: t("categories.mma"), slug: "mma", icon: "🥋" },
+    { name: t("categories.muayThai"), slug: "muay-thai", icon: "🥷" },
+    { name: t("categories.kickboxing"), slug: "kickboxing", icon: "👊" },
   ];
 
   return (
@@ -52,7 +54,7 @@ const Index = () => {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="relative h-[600px] flex items-center">
+      <section className="relative h-[500px] sm:h-[600px] flex items-center">
         <div 
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: `url(${heroImage})` }}
@@ -62,33 +64,32 @@ const Index = () => {
         
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-2xl">
-            <div className="inline-block mb-4 px-4 py-2 bg-gold/20 border border-gold rounded-full">
-              <span className="text-gold font-semibold text-sm">STRENGTH • HONOR • VICTORY</span>
+            <div className="inline-block mb-4 px-3 sm:px-4 py-1.5 sm:py-2 bg-gold/20 border border-gold rounded-full">
+              <span className="text-gold font-semibold text-xs sm:text-sm">{t("hero.tagline")}</span>
             </div>
-            <h1 className="text-5xl md:text-7xl font-display font-bold text-white mb-6 leading-tight">
-              Fight Like a
-              <span className="block text-gold">Gladiator</span>
+            <h1 className="text-3xl sm:text-5xl md:text-7xl font-display font-bold text-white mb-4 sm:mb-6 leading-tight">
+              {t("hero.title")}
+              <span className="block text-gold">{t("hero.titleHighlight")}</span>
             </h1>
-            <p className="text-xl text-white/90 mb-8 leading-relaxed">
-              Premium martial arts equipment crafted with the precision of ancient Roman warriors. 
-              Dominate your discipline with Victus.
+            <p className="text-base sm:text-lg md:text-xl text-white/90 mb-6 sm:mb-8 leading-relaxed">
+              {t("hero.subtitle")}
             </p>
-            <div className="flex flex-wrap gap-4">
-              <Button asChild size="lg" className="gradient-gold text-primary hover:opacity-90 font-semibold">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4">
+              <Button asChild size="lg" className="gradient-gold text-primary hover:opacity-90 font-semibold text-sm sm:text-base">
                 <Link to="/shop">
-                  Shop All Equipment
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  {t("hero.shopAll")}
+                  <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white hover:text-primary">
-                <Link to="/about">Learn Our Story</Link>
+              <Button asChild size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white hover:text-primary text-sm sm:text-base">
+                <Link to="/about">{t("hero.learnStory")}</Link>
               </Button>
             </div>
           </div>
         </div>
         
         {/* Roman Column Decoration */}
-        <div className="absolute bottom-0 right-0 w-32 h-full opacity-20 bg-gradient-to-t from-gold to-transparent" />
+        <div className="absolute bottom-0 right-0 w-16 sm:w-32 h-full opacity-20 bg-gradient-to-t from-gold to-transparent" />
       </section>
 
       {/* Features */}
@@ -100,9 +101,9 @@ const Index = () => {
                 <Shield className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <h3 className="font-display font-semibold text-lg text-primary mb-2">Premium Quality</h3>
+                <h3 className="font-display font-semibold text-lg text-primary mb-2">{t("features.premiumQuality.title")}</h3>
                 <p className="text-sm text-muted-foreground">
-                  Built to last with the finest materials, inspired by legendary craftsmanship.
+                  {t("features.premiumQuality.description")}
                 </p>
               </div>
             </div>
@@ -112,9 +113,9 @@ const Index = () => {
                 <Award className="h-6 w-6 text-gold" />
               </div>
               <div>
-                <h3 className="font-display font-semibold text-lg text-primary mb-2">Champion Approved</h3>
+                <h3 className="font-display font-semibold text-lg text-primary mb-2">{t("features.championApproved.title")}</h3>
                 <p className="text-sm text-muted-foreground">
-                  Trusted by professional fighters and martial artists worldwide.
+                  {t("features.championApproved.description")}
                 </p>
               </div>
             </div>
@@ -124,9 +125,9 @@ const Index = () => {
                 <Truck className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <h3 className="font-display font-semibold text-lg text-primary mb-2">Fast Shipping</h3>
+                <h3 className="font-display font-semibold text-lg text-primary mb-2">{t("features.fastShipping.title")}</h3>
                 <p className="text-sm text-muted-foreground">
-                  Free shipping on orders over $100. Get equipped quickly.
+                  {t("features.fastShipping.description")}
                 </p>
               </div>
             </div>
@@ -139,10 +140,10 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-4xl md:text-5xl font-display font-bold text-primary mb-4">
-              Choose Your Discipline
+              {t("categories.title")}
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              From the ancient arenas to modern combat sports, find equipment for every martial art.
+              {t("categories.subtitle")}
             </p>
           </div>
 
@@ -171,10 +172,10 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-4xl md:text-5xl font-display font-bold text-primary mb-4">
-              Featured Equipment
+              {t("products.featured.title")}
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Our most popular gear, chosen by warriors worldwide.
+              {t("products.featured.subtitle")}
             </p>
           </div>
 
@@ -203,7 +204,7 @@ const Index = () => {
           <div className="text-center mt-12">
             <Button asChild size="lg" className="gradient-roman">
               <Link to="/shop">
-                View All Products
+                {t("products.featured.viewAll")}
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
@@ -215,14 +216,14 @@ const Index = () => {
       <section className="py-20 gradient-roman">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-4xl md:text-5xl font-display font-bold text-white mb-6">
-            Join the Legion of Champions
+            {t("cta.title")}
           </h2>
           <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-            Gear up with equipment that's built for victory. Start your journey to greatness today.
+            {t("cta.subtitle")}
           </p>
           <Button asChild size="lg" className="gradient-gold text-primary hover:opacity-90 font-semibold">
             <Link to="/shop">
-              Start Shopping
+              {t("cta.startShopping")}
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
           </Button>
