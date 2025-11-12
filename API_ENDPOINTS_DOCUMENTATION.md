@@ -2,7 +2,7 @@
 
 ## Base URL
 ```
-http://localhost:8080/api
+http://196.221.167.63:8080/api
 ```
 
 ---

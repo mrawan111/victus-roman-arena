@@ -1,6 +1,6 @@
-// API Base URL - defaults to localhost:8080/api
+// API Base URL - defaults to remote backend IP
 // Can be overridden by setting VITE_API_BASE_URL in .env file
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://196.221.167.63:8080/api";
 
 // Log API base URL in development for debugging
 if (import.meta.env.DEV) {

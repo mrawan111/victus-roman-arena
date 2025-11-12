@@ -63,11 +63,11 @@ This project is built with:
 
 ## API Configuration
 
-The website is configured to connect to a backend API running on `http://localhost:8080/api`.
+The website is configured to connect to a backend API running on `http://196.221.167.63:8080/api`.
 
 ### Setting up the API connection:
 
-1. **Default Configuration**: The app defaults to `http://localhost:8080/api` - no configuration needed if your backend runs on this URL.
+1. **Default Configuration**: The app defaults to `http://196.221.167.63:8080/api`. No configuration is needed if your backend runs on this URL.
 
 2. **Custom API URL**: If your backend runs on a different URL, create a `.env` file in the project root:
    ```
@@ -78,15 +78,15 @@ The website is configured to connect to a backend API running on `http://localho
 
 ### Backend Requirements:
 
-- The backend API should be running on `http://localhost:8080`
+- The backend API should be running on `http://196.221.167.63:8080`
 - API endpoints should be prefixed with `/api`
 - CORS should be enabled to allow requests from the frontend (running on port 8090 by default)
 
 ### Testing the Connection:
 
-1. Start your backend server on `http://localhost:8080`
+1. Ensure your backend server is reachable at `http://196.221.167.63:8080`
 2. Start the frontend with `npm run dev`
-3. Check the browser console for "API Base URL: http://localhost:8080/api"
+3. Check the browser console for `API Base URL: http://196.221.167.63:8080/api`
 4. Try logging in or browsing products to verify the connection
 
 ## How can I deploy this project?
