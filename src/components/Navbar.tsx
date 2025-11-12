@@ -154,6 +154,15 @@ const Navbar = () => {
                     {link.name}
                   </Link>
                 ))}
+                
+                {/* Language Switcher in Mobile Menu */}
+                <div className="pt-4 border-t">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-foreground">Language</span>
+                  </div>
+                  <LanguageSwitcher fullWidth />
+                </div>
+                
                 <div className="pt-4 border-t">
                   {isLoggedIn ? (
                     <div className="space-y-2">

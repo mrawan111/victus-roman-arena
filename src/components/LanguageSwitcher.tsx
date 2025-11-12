@@ -8,13 +8,17 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useLanguage } from '@/contexts/LanguageContext';
 
-const LanguageSwitcher = () => {
+interface LanguageSwitcherProps {
+  fullWidth?: boolean;
+}
+
+const LanguageSwitcher = ({ fullWidth = false }: LanguageSwitcherProps) => {
   const { language, changeLanguage, isRTL } = useLanguage();
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="gap-2">
+        <Button variant="ghost" size="sm" className={`gap-2 ${fullWidth ? 'w-full justify-start' : ''}`}>
           <Globe className="h-4 w-4" />
           <span className="text-sm font-medium">{language.toUpperCase()}</span>
         </Button>
