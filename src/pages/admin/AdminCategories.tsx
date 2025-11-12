@@ -23,6 +23,7 @@ import { Label } from "@/components/ui/label";
 import { categoriesAPI } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { logActivity } from "@/lib/activityLogger";
+import { useTranslation } from "react-i18next";
 
 export default function AdminCategories() {
   const [categories, setCategories] = useState<any[]>([]);
@@ -37,6 +38,7 @@ export default function AdminCategories() {
     isActive: true,
   });
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   useEffect(() => {
     loadCategories();
@@ -49,8 +51,8 @@ export default function AdminCategories() {
     } catch (error: any) {
       console.error("Error loading categories:", error);
       toast({
-        title: "Error",
-        description: "Failed to load categories",
+        title: t("common.error"),
+        description: t("adminPanel.categories.toast.loadError"),
         variant: "destructive",
       });
     } finally {
@@ -82,20 +84,20 @@ export default function AdminCategories() {
 
   const handleDelete = async (id: number) => {
     const category = categories.find((c) => c.categoryId === id);
-    if (!confirm(`Are you sure you want to delete category "${category?.categoryName}"?`)) return;
+    if (!confirm(t("adminPanel.categories.confirmDelete", { name: category?.categoryName || "" }))) return;
 
     try {
       await categoriesAPI.delete(id);
       await logActivity("DELETE", "CATEGORY", id, `Deleted category: ${category?.categoryName}`);
       toast({
-        title: "Success",
-        description: "Category deleted successfully",
+        title: t("common.success"),
+        description: t("adminPanel.categories.toast.deleteSuccess"),
       });
       loadCategories();
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to delete category",
+        title: t("common.error"),
+        description: error.message || t("adminPanel.categories.toast.deleteError"),
         variant: "destructive",
       });
     }
@@ -112,8 +114,8 @@ export default function AdminCategories() {
         });
         await logActivity("UPDATE", "CATEGORY", editingCategory.categoryId, `Updated category: ${formData.categoryName}`);
         toast({
-          title: "Success",
-          description: "Category updated successfully",
+          title: t("common.success"),
+          description: t("adminPanel.categories.toast.updateSuccess"),
         });
       } else {
         const created = await categoriesAPI.create({
@@ -124,16 +126,16 @@ export default function AdminCategories() {
         });
         await logActivity("CREATE", "CATEGORY", created.categoryId, `Created category: ${formData.categoryName}`);
         toast({
-          title: "Success",
-          description: "Category created successfully",
+          title: t("common.success"),
+          description: t("adminPanel.categories.toast.createSuccess"),
         });
       }
       setIsDialogOpen(false);
       loadCategories();
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to save category",
+        title: t("common.error"),
+        description: error.message || t("adminPanel.categories.toast.saveError"),
         variant: "destructive",
       });
     }
@@ -155,25 +157,27 @@ export default function AdminCategories() {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-display font-bold">Categories</h1>
-            <p className="text-muted-foreground mt-1">Manage product categories</p>
+            <h1 className="text-3xl font-display font-bold">{t("adminPanel.categories.title")}</h1>
+            <p className="text-muted-foreground mt-1">{t("adminPanel.categories.subtitle")}</p>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button onClick={handleCreate}>
                 <Plus className="mr-2 h-4 w-4" />
-                Add Category
+                {t("adminPanel.categories.addButton")}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>
-                  {editingCategory ? "Edit Category" : "Create Category"}
+                  {editingCategory
+                    ? t("adminPanel.categories.dialog.editTitle")
+                    : t("adminPanel.categories.dialog.createTitle")}
                 </DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="categoryName">Category Name *</Label>
+                  <Label htmlFor="categoryName">{t("adminPanel.categories.dialog.fields.name.label")}</Label>
                   <Input
                     id="categoryName"
                     value={formData.categoryName}
@@ -181,21 +185,22 @@ export default function AdminCategories() {
                       setFormData({ ...formData, categoryName: e.target.value })
                     }
                     required
+                    placeholder={t("adminPanel.categories.dialog.fields.name.placeholder")}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="categoryImage">Category Image URL</Label>
+                  <Label htmlFor="categoryImage">{t("adminPanel.categories.dialog.fields.image.label")}</Label>
                   <Input
                     id="categoryImage"
                     value={formData.categoryImage}
                     onChange={(e) =>
                       setFormData({ ...formData, categoryImage: e.target.value })
                     }
-                    placeholder="https://example.com/image.jpg"
+                    placeholder={t("adminPanel.categories.dialog.fields.image.placeholder")}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="parentCategoryId">Parent Category</Label>
+                  <Label htmlFor="parentCategoryId">{t("adminPanel.categories.dialog.fields.parent.label")}</Label>
                   <select
                     id="parentCategoryId"
                     value={formData.parentCategoryId}
@@ -204,7 +209,7 @@ export default function AdminCategories() {
                     }
                     className="w-full px-3 py-2 border rounded-md"
                   >
-                    <option value="">None</option>
+                    <option value="">{t("adminPanel.categories.dialog.fields.parent.none")}</option>
                     {categories.map((cat) => (
                       <option key={cat.categoryId} value={cat.categoryId}>
                         {cat.categoryName}
@@ -222,7 +227,7 @@ export default function AdminCategories() {
                     }
                     className="rounded"
                   />
-                  <Label htmlFor="isActive">Active</Label>
+                  <Label htmlFor="isActive">{t("adminPanel.categories.dialog.fields.active.label")}</Label>
                 </div>
                 <div className="flex justify-end gap-2">
                   <Button
@@ -230,10 +235,12 @@ export default function AdminCategories() {
                     variant="outline"
                     onClick={() => setIsDialogOpen(false)}
                   >
-                    Cancel
+                    {t("adminPanel.categories.dialog.cancel")}
                   </Button>
                   <Button type="submit">
-                    {editingCategory ? "Update" : "Create"}
+                    {editingCategory
+                      ? t("adminPanel.categories.dialog.update")
+                      : t("adminPanel.categories.dialog.create")}
                   </Button>
                 </div>
               </form>
@@ -245,7 +252,7 @@ export default function AdminCategories() {
           <div className="flex items-center gap-2">
             <Search className="h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search categories..."
+              placeholder={t("adminPanel.categories.searchPlaceholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="max-w-sm"
@@ -257,25 +264,25 @@ export default function AdminCategories() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Category</TableHead>
-                <TableHead>Parent Category</TableHead>
-                <TableHead>Image</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Created</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>{t("adminPanel.categories.table.columns.category")}</TableHead>
+                <TableHead>{t("adminPanel.categories.table.columns.parent")}</TableHead>
+                <TableHead>{t("adminPanel.categories.table.columns.image")}</TableHead>
+                <TableHead>{t("adminPanel.categories.table.columns.status")}</TableHead>
+                <TableHead>{t("adminPanel.categories.table.columns.created")}</TableHead>
+                <TableHead>{t("adminPanel.categories.table.columns.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-8">
-                    Loading categories...
+                    {t("adminPanel.categories.table.loading")}
                   </TableCell>
                 </TableRow>
               ) : filteredCategories.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-8">
-                    No categories found
+                    {t("adminPanel.categories.table.empty")}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -309,7 +316,9 @@ export default function AdminCategories() {
                             : "bg-red-100 text-red-800"
                         }`}
                       >
-                        {category.isActive !== false ? "Active" : "Inactive"}
+                        {category.isActive !== false
+                          ? t("adminPanel.categories.status.active")
+                          : t("adminPanel.categories.status.inactive")}
                       </span>
                     </TableCell>
                     <TableCell>

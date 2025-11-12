@@ -1,38 +1,41 @@
 import { NavLink } from "react-router-dom";
-import { 
-  LayoutDashboard, 
-  Package, 
-  ShoppingCart, 
-  Users, 
-  Tag, 
-  BarChart3, 
+import {
+  LayoutDashboard,
+  Package,
+  ShoppingCart,
+  Users,
+  Tag,
+  BarChart3,
   Settings,
   FileText,
   Warehouse,
   Folder,
   Store,
   Image as ImageIcon,
-  Layers
+  Layers,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 const navItems = [
-  { to: "/admin", icon: LayoutDashboard, label: "Dashboard", end: true },
-  { to: "/admin/products", icon: Package, label: "Products" },
-  { to: "/admin/categories", icon: Folder, label: "Categories" },
-  { to: "/admin/variants", icon: Layers, label: "Variants" },
-  { to: "/admin/images", icon: ImageIcon, label: "Images" },
-  { to: "/admin/orders", icon: ShoppingCart, label: "Orders" },
-  { to: "/admin/customers", icon: Users, label: "Customers" },
-  { to: "/admin/sellers", icon: Store, label: "Sellers" },
-  { to: "/admin/inventory", icon: Warehouse, label: "Inventory" },
-  { to: "/admin/coupons", icon: Tag, label: "Coupons" },
-  { to: "/admin/reports", icon: BarChart3, label: "Reports" },
-  { to: "/admin/activity", icon: FileText, label: "Activity Logs" },
-  { to: "/admin/settings", icon: Settings, label: "Settings" },
+  { to: "/admin", icon: LayoutDashboard, key: "dashboard", end: true },
+  { to: "/admin/products", icon: Package, key: "products" },
+  { to: "/admin/categories", icon: Folder, key: "categories" },
+  { to: "/admin/variants", icon: Layers, key: "variants" },
+  { to: "/admin/images", icon: ImageIcon, key: "images" },
+  { to: "/admin/orders", icon: ShoppingCart, key: "orders" },
+  { to: "/admin/customers", icon: Users, key: "customers" },
+  { to: "/admin/sellers", icon: Store, key: "sellers" },
+  { to: "/admin/inventory", icon: Warehouse, key: "inventory" },
+  { to: "/admin/coupons", icon: Tag, key: "coupons" },
+  { to: "/admin/reports", icon: BarChart3, key: "reports" },
+  { to: "/admin/activity", icon: FileText, key: "activity" },
+  { to: "/admin/settings", icon: Settings, key: "settings" },
 ];
 
 export default function AdminSidebar() {
+  const { t } = useTranslation();
+
   return (
     <nav className="flex-1 p-4">
       <ul className="space-y-1">
@@ -51,7 +54,7 @@ export default function AdminSidebar() {
               }
             >
               <item.icon className="h-5 w-5" />
-              {item.label}
+              {t(`adminPanel.nav.${item.key}`)}
             </NavLink>
           </li>
         ))}

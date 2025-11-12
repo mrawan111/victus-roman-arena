@@ -14,12 +14,14 @@ import {
 } from "@/components/ui/table";
 import { variantsAPI, productsAPI } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 export default function AdminInventory() {
   const [variants, setVariants] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   useEffect(() => {
     loadInventory();
@@ -43,8 +45,8 @@ export default function AdminInventory() {
     } catch (error: any) {
       console.error("Error loading inventory:", error);
       toast({
-        title: "Error",
-        description: "Failed to load inventory",
+        title: t("common.error"),
+        description: t("adminPanel.inventory.toast.loadError"),
         variant: "destructive",
       });
     } finally {
@@ -69,14 +71,17 @@ export default function AdminInventory() {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-display font-bold">Inventory</h1>
-            <p className="text-muted-foreground mt-1">Track stock levels and manage inventory</p>
+            <h1 className="text-3xl font-display font-bold">{t("adminPanel.inventory.title")}</h1>
+            <p className="text-muted-foreground mt-1">{t("adminPanel.inventory.subtitle")}</p>
           </div>
           {lowStockVariants.length > 0 && (
             <div className="flex items-center gap-2 text-red-600">
               <AlertTriangle className="h-5 w-5" />
               <span className="font-semibold">
-                {lowStockVariants.length} Low Stock Item{lowStockVariants.length !== 1 ? "s" : ""}
+                {t("adminPanel.inventory.lowStock", {
+                  count: lowStockVariants.length,
+                  plural: lowStockVariants.length !== 1 ? "s" : "",
+                })}
               </span>
             </div>
           )}
@@ -86,7 +91,7 @@ export default function AdminInventory() {
           <div className="flex items-center gap-2">
             <Search className="h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search by product, color, size, or SKU..."
+              placeholder={t("adminPanel.inventory.searchPlaceholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="max-w-sm"
@@ -98,26 +103,26 @@ export default function AdminInventory() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Product</TableHead>
-                <TableHead>Variant</TableHead>
-                <TableHead>SKU</TableHead>
-                <TableHead>Stock Quantity</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>{t("adminPanel.inventory.table.columns.product")}</TableHead>
+                <TableHead>{t("adminPanel.inventory.table.columns.variant")}</TableHead>
+                <TableHead>{t("adminPanel.inventory.table.columns.sku")}</TableHead>
+                <TableHead>{t("adminPanel.inventory.table.columns.stock")}</TableHead>
+                <TableHead>{t("adminPanel.inventory.table.columns.price")}</TableHead>
+                <TableHead>{t("adminPanel.inventory.table.columns.status")}</TableHead>
+                <TableHead>{t("adminPanel.inventory.table.columns.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center py-8">
-                    Loading inventory...
+                    {t("adminPanel.inventory.table.loading")}
                   </TableCell>
                 </TableRow>
               ) : filteredVariants.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center py-8">
-                    No inventory items found
+                    {t("adminPanel.inventory.table.empty")}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -160,12 +165,12 @@ export default function AdminInventory() {
                             : "bg-red-100 text-red-800"
                         }`}
                       >
-                        {variant.isActive !== false ? "Active" : "Inactive"}
+                        {variant.isActive !== false ? t("adminPanel.inventory.status.active") : t("adminPanel.inventory.status.inactive")}
                       </span>
                     </TableCell>
                     <TableCell>
                       <Button variant="ghost" size="sm">
-                        Edit
+                        {t("adminPanel.inventory.buttons.edit")}
                       </Button>
                     </TableCell>
                   </TableRow>

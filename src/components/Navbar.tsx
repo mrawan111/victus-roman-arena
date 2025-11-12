@@ -158,7 +158,7 @@ const Navbar = () => {
                 {/* Language Switcher in Mobile Menu */}
                 <div className="pt-4 border-t">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-foreground">Language</span>
+                    <span className="text-sm font-medium text-foreground">{t("language.label")}</span>
                   </div>
                   <LanguageSwitcher fullWidth />
                 </div>

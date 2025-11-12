@@ -7,6 +7,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
 interface LanguageSwitcherProps {
   fullWidth?: boolean;
@@ -14,6 +15,7 @@ interface LanguageSwitcherProps {
 
 const LanguageSwitcher = ({ fullWidth = false }: LanguageSwitcherProps) => {
   const { language, changeLanguage, isRTL } = useLanguage();
+  const { t } = useTranslation();
 
   return (
     <DropdownMenu>
@@ -29,14 +31,14 @@ const LanguageSwitcher = ({ fullWidth = false }: LanguageSwitcherProps) => {
           className={language === 'en' ? 'bg-accent' : ''}
         >
           <span className={isRTL ? 'ml-2' : 'mr-2'}>🇬🇧</span>
-          English
+          {t('language.english')}
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => changeLanguage('ar')}
           className={language === 'ar' ? 'bg-accent' : ''}
         >
           <span className={isRTL ? 'ml-2' : 'mr-2'}>🇸🇦</span>
-          العربية
+          {t('language.arabic')}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

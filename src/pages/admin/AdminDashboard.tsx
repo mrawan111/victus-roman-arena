@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DollarSign, ShoppingCart, Package, AlertTriangle } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { ordersAPI, productsAPI, variantsAPI } from "@/lib/api";
+import { useTranslation } from "react-i18next";
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -12,6 +13,7 @@ export default function AdminDashboard() {
     totalProducts: 0,
   });
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
 
   useEffect(() => {
     loadDashboardStats();
@@ -52,25 +54,25 @@ export default function AdminDashboard() {
 
   const statCards = [
     {
-      title: "Total Revenue",
+      title: t("adminPanel.dashboard.cards.revenue"),
       value: `$${stats.totalRevenue.toFixed(2)}`,
       icon: DollarSign,
       color: "text-green-600",
     },
     {
-      title: "Total Orders",
+      title: t("adminPanel.dashboard.cards.orders"),
       value: stats.totalOrders,
       icon: ShoppingCart,
       color: "text-blue-600",
     },
     {
-      title: "Total Products",
+      title: t("adminPanel.dashboard.cards.products"),
       value: stats.totalProducts,
       icon: Package,
       color: "text-purple-600",
     },
     {
-      title: "Low Stock Alerts",
+      title: t("adminPanel.dashboard.cards.lowStock"),
       value: stats.lowStockProducts,
       icon: AlertTriangle,
       color: "text-red-600",
@@ -81,7 +83,10 @@ export default function AdminDashboard() {
     return (
       <AdminLayout>
         <div className="flex items-center justify-center h-full">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <div className="flex flex-col items-center gap-3">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" aria-hidden />
+            <span className="text-muted-foreground">{t("adminPanel.dashboard.loading")}</span>
+          </div>
         </div>
       </AdminLayout>
     );
@@ -91,8 +96,8 @@ export default function AdminDashboard() {
     <AdminLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-display font-bold">Dashboard</h1>
-          <p className="text-muted-foreground mt-1">Overview of your store performance</p>
+          <h1 className="text-3xl font-display font-bold">{t("adminPanel.dashboard.title")}</h1>
+          <p className="text-muted-foreground mt-1">{t("adminPanel.dashboard.subtitle")}</p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -113,12 +118,11 @@ export default function AdminDashboard() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Welcome to Victus Admin</CardTitle>
+            <CardTitle>{t("adminPanel.dashboard.welcomeTitle")}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground">
-              Manage your martial arts equipment store with comprehensive tools for products, orders,
-              inventory, customers, and more.
+              {t("adminPanel.dashboard.welcomeDescription")}
             </p>
           </CardContent>
         </Card>

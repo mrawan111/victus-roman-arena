@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, ReactNode } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 export interface CartItem {
   variantId: number;
@@ -27,22 +28,23 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [items, setItems] = useState<CartItem[]>([]);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const addToCart = (item: Omit<CartItem, "quantity">) => {
     setItems((prev) => {
       const existing = prev.find((i) => i.variantId === item.variantId);
       if (existing) {
         toast({
-          title: "Updated cart",
-          description: `${item.name} quantity increased`,
+          title: t("cartContext.updatedTitle"),
+          description: t("cartContext.updatedDescription", { product: item.name }),
         });
         return prev.map((i) =>
           i.variantId === item.variantId ? { ...i, quantity: i.quantity + 1 } : i
         );
       }
       toast({
-        title: "Added to cart",
-        description: `${item.name} added to your cart`,
+        title: t("cartContext.addedTitle"),
+        description: t("cartContext.addedDescription", { product: item.name }),
       });
       return [...prev, { ...item, quantity: 1 }];
     });
@@ -51,8 +53,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const removeFromCart = (variantId: number) => {
     setItems((prev) => prev.filter((i) => i.variantId !== variantId));
     toast({
-      title: "Removed from cart",
-      description: "Item removed from your cart",
+      title: t("cartContext.removedTitle"),
+      description: t("cartContext.removedDescription"),
     });
   };
 

@@ -14,12 +14,14 @@ import {
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { sellersAPI } from "@/lib/api";
+import { useTranslation } from "react-i18next";
 
 export default function AdminSellers() {
   const [sellers, setSellers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   useEffect(() => {
     loadSellers();
@@ -32,8 +34,8 @@ export default function AdminSellers() {
     } catch (error: any) {
       console.error("Error loading sellers:", error);
       toast({
-        title: "Error",
-        description: error.message || "Failed to load sellers",
+        title: t("common.error"),
+        description: error.message || t("adminPanel.sellers.table.loading"),
         variant: "destructive",
       });
     } finally {
@@ -52,12 +54,12 @@ export default function AdminSellers() {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-display font-bold">Sellers</h1>
-            <p className="text-muted-foreground mt-1">Manage seller accounts and profiles</p>
+            <h1 className="text-3xl font-display font-bold">{t("adminPanel.sellers.title")}</h1>
+            <p className="text-muted-foreground mt-1">{t("adminPanel.sellers.subtitle")}</p>
           </div>
           <Button>
             <Plus className="mr-2 h-4 w-4" />
-            Add Seller
+            {t("adminPanel.sellers.addButton")}
           </Button>
         </div>
 
@@ -65,7 +67,7 @@ export default function AdminSellers() {
           <div className="flex items-center gap-2">
             <Search className="h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search sellers by name or email..."
+              placeholder={t("adminPanel.sellers.searchPlaceholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="max-w-sm"
@@ -77,19 +79,19 @@ export default function AdminSellers() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Seller</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Rating</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Created</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>{t("adminPanel.sellers.table.columns.seller")}</TableHead>
+                <TableHead>{t("adminPanel.sellers.table.columns.email")}</TableHead>
+                <TableHead>{t("adminPanel.sellers.table.columns.rating")}</TableHead>
+                <TableHead>{t("adminPanel.sellers.table.columns.status")}</TableHead>
+                <TableHead>{t("adminPanel.sellers.table.columns.created")}</TableHead>
+                <TableHead>{t("adminPanel.sellers.table.columns.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-8">
-                    Loading sellers...
+                    {t("adminPanel.sellers.table.loading")}
                   </TableCell>
                 </TableRow>
               ) : filteredSellers.length === 0 ? (
@@ -99,10 +101,10 @@ export default function AdminSellers() {
                       <Store className="h-12 w-12 text-muted-foreground" />
                       <div>
                         <p className="text-lg font-semibold text-muted-foreground">
-                          No sellers found
+                          {t("adminPanel.sellers.table.emptyTitle")}
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          Add seller accounts to manage seller products
+                          {t("adminPanel.sellers.table.emptySubtitle")}
                         </p>
                       </div>
                     </div>
@@ -137,7 +139,7 @@ export default function AdminSellers() {
                             : "bg-red-100 text-red-800"
                         }`}
                       >
-                        {seller.isActive !== false ? "Active" : "Inactive"}
+                        {seller.isActive !== false ? t("adminPanel.sellers.status.active") : t("adminPanel.sellers.status.inactive")}
                       </span>
                     </TableCell>
                     <TableCell>
@@ -147,7 +149,7 @@ export default function AdminSellers() {
                     </TableCell>
                     <TableCell>
                       <Button variant="ghost" size="sm">
-                        View
+                        {t("adminPanel.sellers.buttons.view")}
                       </Button>
                     </TableCell>
                   </TableRow>

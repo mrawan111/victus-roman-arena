@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { Shield, Mail, Lock } from "lucide-react";
 import { authAPI } from "@/lib/api";
+import { useTranslation } from "react-i18next";
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -18,6 +19,7 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const session = localStorage.getItem("adminSession");
@@ -52,8 +54,8 @@ export default function Auth() {
         }));
 
         toast({
-          title: "Welcome back!",
-          description: "You've successfully logged in.",
+          title: t("auth.admin.toastLoginSuccessTitle"),
+          description: t("auth.admin.toastLoginSuccessDescription"),
         });
         navigate("/admin");
       } else {
@@ -78,16 +80,16 @@ export default function Auth() {
         }));
 
         toast({
-          title: "Account created!",
-          description: "Your account has been created successfully.",
+          title: t("auth.admin.toastSignupSuccessTitle"),
+          description: t("auth.admin.toastSignupSuccessDescription"),
         });
         
         navigate("/admin");
       }
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Authentication failed",
+        title: t("auth.admin.toastErrorTitle"),
+        description: error.message || t("auth.admin.toastErrorDescription"),
         variant: "destructive",
       });
     } finally {
@@ -102,9 +104,9 @@ export default function Auth() {
           <div className="flex justify-center mb-4">
             <Shield className="h-12 w-12 text-primary" />
           </div>
-          <CardTitle className="text-2xl font-display">Admin Portal</CardTitle>
+          <CardTitle className="text-2xl font-display">{t("auth.admin.title")}</CardTitle>
           <CardDescription>
-            {isLogin ? "Sign in to access the admin panel" : "Create your admin account"}
+            {isLogin ? t("auth.admin.loginDescription") : t("auth.admin.signupDescription")}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -113,22 +115,22 @@ export default function Auth() {
               <>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name</Label>
+                    <Label htmlFor="firstName">{t("forms.firstName")}</Label>
                     <Input
                       id="firstName"
                       type="text"
-                      placeholder="John"
+                      placeholder={t("placeholders.name")}
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
                       required={!isLogin}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="lastName">Last Name</Label>
+                    <Label htmlFor="lastName">{t("forms.lastName")}</Label>
                     <Input
                       id="lastName"
                       type="text"
-                      placeholder="Doe"
+                      placeholder={t("placeholders.name")}
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
                       required={!isLogin}
@@ -136,11 +138,11 @@ export default function Auth() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="phoneNum">Phone Number (Optional)</Label>
+                  <Label htmlFor="phoneNum">{t("forms.phoneOptional")}</Label>
                   <Input
                     id="phoneNum"
                     type="tel"
-                    placeholder="+1 (555) 123-4567"
+                    placeholder={t("placeholders.phone")}
                     value={phoneNum}
                     onChange={(e) => setPhoneNum(e.target.value)}
                   />
@@ -148,13 +150,13 @@ export default function Auth() {
               </>
             )}
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t("forms.email")}</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="email"
                   type="email"
-                  placeholder="admin@victus.com"
+                  placeholder={t("placeholders.email")}
                   className="pl-10"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -163,13 +165,13 @@ export default function Auth() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t("forms.password")}</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="password"
                   type="password"
-                  placeholder="••••••••"
+                  placeholder={t("placeholders.password")}
                   className="pl-10"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -178,7 +180,11 @@ export default function Auth() {
               </div>
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Processing..." : isLogin ? "Sign In" : "Create Account"}
+              {loading
+                ? t("auth.admin.processing")
+                : isLogin
+                ? t("auth.admin.loginCta")
+                : t("auth.admin.signupCta")}
             </Button>
           </form>
           <div className="mt-4 text-center text-sm">
@@ -187,7 +193,7 @@ export default function Auth() {
               onClick={() => setIsLogin(!isLogin)}
               className="text-primary hover:underline"
             >
-              {isLogin ? "Need an account? Sign up" : "Already have an account? Sign in"}
+              {isLogin ? t("auth.admin.toggleToSignup") : t("auth.admin.toggleToLogin")}
             </button>
           </div>
         </CardContent>

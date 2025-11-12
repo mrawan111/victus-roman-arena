@@ -6,9 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Mail, Phone, MapPin, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 const Contact = () => {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -19,8 +21,8 @@ const Contact = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     toast({
-      title: "Message Sent!",
-      description: "Thank you for contacting Victus. We'll respond within 24 hours.",
+      title: t("contact.form.toastTitle"),
+      description: t("contact.form.toastDescription"),
     });
     setFormData({ name: "", email: "", subject: "", message: "" });
   };
@@ -41,10 +43,10 @@ const Contact = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-3xl sm:text-4xl md:text-6xl font-display font-bold text-white mb-4 sm:mb-6">
-              Get In Touch
+              {t("contact.hero.title")}
             </h1>
             <p className="text-base sm:text-lg md:text-xl text-white/90 px-4">
-              Have questions about our equipment? We're here to help you find the perfect gear.
+              {t("contact.hero.subtitle")}
             </p>
           </div>
         </div>
@@ -58,10 +60,10 @@ const Contact = () => {
             <div className="space-y-6 sm:space-y-8">
               <div>
                 <h2 className="text-2xl sm:text-3xl font-display font-bold text-primary mb-4 sm:mb-6">
-                  Contact Information
+                  {t("contact.info.title")}
                 </h2>
                 <p className="text-sm sm:text-base text-muted-foreground mb-6 sm:mb-8">
-                  Reach out to our team for any inquiries about products, orders, or partnerships.
+                  {t("contact.info.description")}
                 </p>
               </div>
 
@@ -71,11 +73,9 @@ const Contact = () => {
                     <MapPin className="h-6 w-6 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-primary mb-1">Address</h3>
+                    <h3 className="font-semibold text-primary mb-1">{t("contact.info.addressTitle")}</h3>
                     <p className="text-muted-foreground">
-                      123 Arena Street<br />
-                      Sports City, SC 12345<br />
-                      United States
+                      {t("footer.contact.address")}
                     </p>
                   </div>
                 </div>
@@ -85,9 +85,9 @@ const Contact = () => {
                     <Phone className="h-6 w-6 text-gold" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-primary mb-1">Phone</h3>
-                    <p className="text-muted-foreground">+1 (555) 123-4567</p>
-                    <p className="text-sm text-muted-foreground">Mon-Fri 9am-6pm EST</p>
+                    <h3 className="font-semibold text-primary mb-1">{t("contact.info.phoneTitle")}</h3>
+                    <p className="text-muted-foreground">{t("footer.contact.phone")}</p>
+                    <p className="text-sm text-muted-foreground">{t("contact.info.phoneHours")}</p>
                   </div>
                 </div>
 
@@ -96,9 +96,9 @@ const Contact = () => {
                     <Mail className="h-6 w-6 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-primary mb-1">Email</h3>
-                    <p className="text-muted-foreground">info@victus.com</p>
-                    <p className="text-sm text-muted-foreground">We'll respond within 24 hours</p>
+                    <h3 className="font-semibold text-primary mb-1">{t("contact.info.emailTitle")}</h3>
+                    <p className="text-muted-foreground">{t("footer.contact.email")}</p>
+                    <p className="text-sm text-muted-foreground">{t("contact.info.responseTime")}</p>
                   </div>
                 </div>
               </div>
@@ -110,7 +110,7 @@ const Contact = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   <div>
                     <label htmlFor="name" className="block text-sm font-semibold text-primary mb-2">
-                      Name *
+                      {t("forms.name")} *
                     </label>
                     <Input
                       id="name"
@@ -118,13 +118,13 @@ const Contact = () => {
                       value={formData.name}
                       onChange={handleChange}
                       required
-                      placeholder="Your name"
+                      placeholder={t("placeholders.name")}
                       className="w-full"
                     />
                   </div>
                   <div>
                     <label htmlFor="email" className="block text-sm font-semibold text-primary mb-2">
-                      Email *
+                      {t("forms.email")} *
                     </label>
                     <Input
                       id="email"
@@ -133,7 +133,7 @@ const Contact = () => {
                       value={formData.email}
                       onChange={handleChange}
                       required
-                      placeholder="your@email.com"
+                      placeholder={t("placeholders.email")}
                       className="w-full"
                     />
                   </div>
@@ -141,7 +141,7 @@ const Contact = () => {
 
                 <div>
                   <label htmlFor="subject" className="block text-sm font-semibold text-primary mb-2">
-                    Subject *
+                    {t("forms.subject")} *
                   </label>
                   <Input
                     id="subject"
@@ -149,14 +149,14 @@ const Contact = () => {
                     value={formData.subject}
                     onChange={handleChange}
                     required
-                    placeholder="How can we help?"
+                    placeholder={t("placeholders.subject")}
                     className="w-full"
                   />
                 </div>
 
                 <div>
                   <label htmlFor="message" className="block text-sm font-semibold text-primary mb-2">
-                    Message *
+                    {t("forms.message")} *
                   </label>
                   <Textarea
                     id="message"
@@ -164,7 +164,7 @@ const Contact = () => {
                     value={formData.message}
                     onChange={handleChange}
                     required
-                    placeholder="Tell us more about your inquiry..."
+                    placeholder={t("placeholders.message")}
                     rows={6}
                     className="w-full resize-none"
                   />
@@ -172,7 +172,7 @@ const Contact = () => {
 
                 <Button type="submit" className="w-full gradient-roman text-base sm:text-lg py-4 sm:py-6">
                   <Send className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                  Send Message
+                  {t("buttons.sendMessage")}
                 </Button>
               </form>
             </div>

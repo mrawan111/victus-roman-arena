@@ -22,6 +22,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { variantsAPI, productsAPI } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 export default function AdminVariants() {
   const [variants, setVariants] = useState<any[]>([]);
@@ -40,6 +41,7 @@ export default function AdminVariants() {
     isActive: true,
   });
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   useEffect(() => {
     loadData();
@@ -57,8 +59,8 @@ export default function AdminVariants() {
     } catch (error: any) {
       console.error("Error loading data:", error);
       toast({
-        title: "Error",
-        description: "Failed to load variants",
+        title: t("common.error"),
+        description: t("adminPanel.variants.toast.loadError"),
         variant: "destructive",
       });
     } finally {
@@ -95,19 +97,19 @@ export default function AdminVariants() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this variant?")) return;
+    if (!confirm(t("adminPanel.variants.confirmDelete"))) return;
 
     try {
       await variantsAPI.delete(id);
       toast({
-        title: "Success",
-        description: "Variant deleted successfully",
+        title: t("common.success"),
+        description: t("adminPanel.variants.toast.deleteSuccess"),
       });
       loadData();
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to delete variant",
+        title: t("common.error"),
+        description: error.message || t("adminPanel.variants.toast.deleteError"),
         variant: "destructive",
       });
     }
@@ -130,14 +132,14 @@ export default function AdminVariants() {
       if (editingVariant) {
         await variantsAPI.update(editingVariant.variantId, data);
         toast({
-          title: "Success",
-          description: "Variant updated successfully",
+          title: t("common.success"),
+          description: t("adminPanel.variants.toast.updateSuccess"),
         });
       } else {
         await variantsAPI.create(data);
         toast({
-          title: "Success",
-          description: "Variant created successfully",
+          title: t("common.success"),
+          description: t("adminPanel.variants.toast.createSuccess"),
         });
       }
 
@@ -145,8 +147,8 @@ export default function AdminVariants() {
       loadData();
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to save variant",
+        title: t("common.error"),
+        description: error.message || t("adminPanel.variants.toast.saveError"),
         variant: "destructive",
       });
     }
@@ -164,7 +166,7 @@ export default function AdminVariants() {
 
   const getProductName = (productId: number) => {
     const product = products.find((p) => p.productId === productId);
-    return product?.productName || `Product #${productId}`;
+    return product?.productName || t("adminPanel.variants.productFallback", { id: productId });
   };
 
   return (
@@ -172,25 +174,27 @@ export default function AdminVariants() {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-display font-bold">Product Variants</h1>
-            <p className="text-muted-foreground mt-1">Manage product variants, sizes, colors, and stock</p>
+            <h1 className="text-3xl font-display font-bold">{t("adminPanel.variants.title")}</h1>
+            <p className="text-muted-foreground mt-1">{t("adminPanel.variants.subtitle")}</p>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button onClick={handleCreate}>
                 <Plus className="mr-2 h-4 w-4" />
-                Add Variant
+                {t("adminPanel.variants.addButton")}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
               <DialogHeader>
                 <DialogTitle>
-                  {editingVariant ? "Edit Variant" : "Create Variant"}
+                  {editingVariant
+                    ? t("adminPanel.variants.dialog.editTitle")
+                    : t("adminPanel.variants.dialog.createTitle")}
                 </DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="productId">Product *</Label>
+                  <Label htmlFor="productId">{t("adminPanel.variants.dialog.fields.product.label")}</Label>
                   <select
                     id="productId"
                     value={formData.productId}
@@ -200,7 +204,7 @@ export default function AdminVariants() {
                     className="w-full px-3 py-2 border rounded-md"
                     required
                   >
-                    <option value="">Select Product</option>
+                    <option value="">{t("adminPanel.variants.dialog.fields.product.placeholder")}</option>
                     {products.map((product) => (
                       <option key={product.productId} value={product.productId}>
                         {product.productName}
@@ -210,31 +214,31 @@ export default function AdminVariants() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="color">Color</Label>
+                    <Label htmlFor="color">{t("adminPanel.variants.dialog.fields.color.label")}</Label>
                     <Input
                       id="color"
                       value={formData.color}
                       onChange={(e) =>
                         setFormData({ ...formData, color: e.target.value })
                       }
-                      placeholder="Red, Blue, etc."
+                      placeholder={t("adminPanel.variants.dialog.fields.color.placeholder")}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="size">Size</Label>
+                    <Label htmlFor="size">{t("adminPanel.variants.dialog.fields.size.label")}</Label>
                     <Input
                       id="size"
                       value={formData.size}
                       onChange={(e) =>
                         setFormData({ ...formData, size: e.target.value })
                       }
-                      placeholder="S, M, L, XL, etc."
+                      placeholder={t("adminPanel.variants.dialog.fields.size.placeholder")}
                     />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="stockQuantity">Stock Quantity *</Label>
+                    <Label htmlFor="stockQuantity">{t("adminPanel.variants.dialog.fields.stock.label")}</Label>
                     <Input
                       id="stockQuantity"
                       type="number"
@@ -247,7 +251,7 @@ export default function AdminVariants() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="price">Price *</Label>
+                    <Label htmlFor="price">{t("adminPanel.variants.dialog.fields.price.label")}</Label>
                     <Input
                       id="price"
                       type="number"
@@ -262,14 +266,14 @@ export default function AdminVariants() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="sku">SKU (Optional)</Label>
+                  <Label htmlFor="sku">{t("adminPanel.variants.dialog.fields.sku.label")}</Label>
                   <Input
                     id="sku"
                     value={formData.sku}
                     onChange={(e) =>
                       setFormData({ ...formData, sku: e.target.value })
                     }
-                    placeholder="Product SKU"
+                    placeholder={t("adminPanel.variants.dialog.fields.sku.placeholder")}
                   />
                 </div>
                 <div className="flex items-center space-x-2">
@@ -282,7 +286,7 @@ export default function AdminVariants() {
                     }
                     className="rounded"
                   />
-                  <Label htmlFor="isActive">Active</Label>
+                  <Label htmlFor="isActive">{t("adminPanel.variants.dialog.fields.active.label")}</Label>
                 </div>
                 <div className="flex justify-end gap-2">
                   <Button
@@ -290,10 +294,12 @@ export default function AdminVariants() {
                     variant="outline"
                     onClick={() => setIsDialogOpen(false)}
                   >
-                    Cancel
+                    {t("adminPanel.variants.dialog.cancel")}
                   </Button>
                   <Button type="submit">
-                    {editingVariant ? "Update" : "Create"}
+                    {editingVariant
+                      ? t("adminPanel.variants.dialog.update")
+                      : t("adminPanel.variants.dialog.create")}
                   </Button>
                 </div>
               </form>
@@ -305,7 +311,7 @@ export default function AdminVariants() {
           <div className="flex items-center gap-2">
             <Search className="h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search by product, color, size, or SKU..."
+              placeholder={t("adminPanel.variants.searchPlaceholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="max-w-sm"
@@ -317,26 +323,26 @@ export default function AdminVariants() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Product</TableHead>
-                <TableHead>Variant</TableHead>
-                <TableHead>SKU</TableHead>
-                <TableHead>Stock</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>{t("adminPanel.variants.table.columns.product")}</TableHead>
+                <TableHead>{t("adminPanel.variants.table.columns.variant")}</TableHead>
+                <TableHead>{t("adminPanel.variants.table.columns.sku")}</TableHead>
+                <TableHead>{t("adminPanel.variants.table.columns.stock")}</TableHead>
+                <TableHead>{t("adminPanel.variants.table.columns.price")}</TableHead>
+                <TableHead>{t("adminPanel.variants.table.columns.status")}</TableHead>
+                <TableHead>{t("adminPanel.variants.table.columns.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center py-8">
-                    Loading variants...
+                    {t("adminPanel.variants.table.loading")}
                   </TableCell>
                 </TableRow>
               ) : filteredVariants.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center py-8">
-                    No variants found
+                    {t("adminPanel.variants.table.empty")}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -379,7 +385,9 @@ export default function AdminVariants() {
                             : "bg-red-100 text-red-800"
                         }`}
                       >
-                        {variant.isActive !== false ? "Active" : "Inactive"}
+                        {variant.isActive !== false
+                          ? t("adminPanel.variants.status.active")
+                          : t("adminPanel.variants.status.inactive")}
                       </span>
                     </TableCell>
                     <TableCell>

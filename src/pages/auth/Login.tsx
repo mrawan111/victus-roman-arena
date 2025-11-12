@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { Mail, Lock, LogIn } from "lucide-react";
 import { authAPI } from "@/lib/api";
+import { useTranslation } from "react-i18next";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -16,6 +17,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   useEffect(() => {
     // Check if user is already logged in
@@ -51,8 +53,8 @@ export default function Login() {
       }));
 
       toast({
-        title: "Welcome back!",
-        description: "You've successfully logged in.",
+        title: t("auth.login.toastSuccessTitle"),
+        description: t("auth.login.toastSuccessDescription"),
       });
       
       // Redirect to previous page or home
@@ -60,8 +62,8 @@ export default function Login() {
       navigate(redirectTo);
     } catch (error: any) {
       toast({
-        title: "Login Failed",
-        description: error.message || "Invalid email or password. Please try again.",
+        title: t("auth.login.toastErrorTitle"),
+        description: error.message || t("auth.login.toastErrorDescription"),
         variant: "destructive",
       });
     } finally {
@@ -79,21 +81,21 @@ export default function Login() {
             <div className="flex justify-center mb-4">
               <LogIn className="h-12 w-12 text-primary" />
             </div>
-            <CardTitle className="text-2xl font-display">Sign In</CardTitle>
+            <CardTitle className="text-2xl font-display">{t("auth.login.title")}</CardTitle>
             <CardDescription>
-              Enter your credentials to access your account
+              {t("auth.login.description")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t("forms.email")}</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="email"
                     type="email"
-                    placeholder="your@email.com"
+                    placeholder={t("placeholders.email")}
                     className="pl-10"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -103,13 +105,13 @@ export default function Login() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t("forms.password")}</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="password"
                     type="password"
-                    placeholder="••••••••"
+                    placeholder={t("placeholders.password")}
                     className="pl-10"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -119,19 +121,19 @@ export default function Login() {
                 </div>
               </div>
               <Button type="submit" className="w-full gradient-roman" disabled={loading}>
-                {loading ? "Signing in..." : "Sign In"}
+                {loading ? t("auth.login.loading") : t("auth.login.cta")}
               </Button>
             </form>
             <div className="mt-6 text-center text-sm space-y-2">
               <p className="text-muted-foreground">
-                Don't have an account?{" "}
+                {t("auth.login.noAccount")}{" "}
                 <Link to="/signup" className="text-primary hover:underline font-medium">
-                  Sign up
+                  {t("auth.login.signupLink")}
                 </Link>
               </p>
               <p className="text-muted-foreground">
                 <Link to="/auth" className="text-primary hover:underline">
-                  Admin Login
+                  {t("auth.login.adminLink")}
                 </Link>
               </p>
             </div>

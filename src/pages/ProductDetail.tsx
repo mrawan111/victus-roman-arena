@@ -10,11 +10,13 @@ import { productsAPI, variantsAPI } from "@/lib/api";
 import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
 import { products as fallbackProducts } from "@/data/products";
+import { useTranslation } from "react-i18next";
 
 const ProductDetail = () => {
   const { id } = useParams();
   const { addToCart } = useCart();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [product, setProduct] = useState<any>(null);
   const [variants, setVariants] = useState<any[]>([]);
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
@@ -63,8 +65,8 @@ const ProductDetail = () => {
         setSelectedVariant(null);
       } else {
         toast({
-          title: "Error",
-          description: "Product not found",
+          title: t("common.error"),
+          description: t("product.notFoundDescription"),
           variant: "destructive",
         });
       }
@@ -91,9 +93,11 @@ const ProductDetail = () => {
         <Navbar />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <h1 className="text-4xl font-display font-bold text-primary mb-4">Product Not Found</h1>
+            <h1 className="text-4xl font-display font-bold text-primary mb-4">
+              {t("product.notFoundTitle")}
+            </h1>
             <Button asChild>
-              <Link to="/shop">Return to Shop</Link>
+              <Link to="/shop">{t("product.returnToShop")}</Link>
             </Button>
           </div>
         </div>
@@ -111,7 +115,7 @@ const ProductDetail = () => {
           <Button asChild variant="ghost" className="mb-8">
             <Link to="/shop">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Shop
+              {t("product.backToShop")}
             </Link>
           </Button>
 
@@ -140,23 +144,25 @@ const ProductDetail = () => {
                   <span className="text-3xl sm:text-4xl font-bold text-primary">${product.price?.toFixed(2) || "0.00"}</span>
                   {product.inStock ? (
                     <Badge variant="outline" className="text-green-600 border-green-600 w-fit">
-                      In Stock
+                      {t("product.inStock")}
                     </Badge>
                   ) : (
                     <Badge variant="outline" className="text-red-600 border-red-600 w-fit">
-                      Out of Stock
+                      {t("product.outOfStock")}
                     </Badge>
                   )}
                 </div>
               </div>
 
               <div className="prose max-w-none">
-                <p className="text-lg text-muted-foreground">{product.description || "No description available."}</p>
+                <p className="text-lg text-muted-foreground">{product.description || t("product.description")}</p>
               </div>
 
               {product.features && product.features.length > 0 && (
                 <div>
-                  <h3 className="font-display font-semibold text-xl text-primary mb-4">Features</h3>
+                  <h3 className="font-display font-semibold text-xl text-primary mb-4">
+                    {t("product.featuresTitle")}
+                  </h3>
                   <ul className="space-y-2">
                     {product.features.map((feature: string, index: number) => (
                       <li key={index} className="flex items-start space-x-2">
@@ -173,7 +179,7 @@ const ProductDetail = () => {
                 <div className="space-y-4 pt-4">
                   <div>
                     <label className="block text-sm font-medium text-primary mb-2">
-                      Select Variant
+                      {t("product.selectVariant")}
                     </label>
                     <Select
                       value={selectedVariant?.variantId?.toString() || ""}
@@ -183,7 +189,7 @@ const ProductDetail = () => {
                       }}
                     >
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Choose a variant" />
+                        <SelectValue placeholder={t("product.variantPlaceholder")} />
                       </SelectTrigger>
                       <SelectContent>
                         {variants.map((variant) => (
@@ -225,7 +231,7 @@ const ProductDetail = () => {
                   }}
                 >
                   <ShoppingCart className="mr-2 h-5 w-5" />
-                  {product.inStock ? "Add to Cart" : "Out of Stock"}
+                  {product.inStock ? t("product.addToCart") : t("product.outOfStock")}
                 </Button>
               </div>
 
@@ -234,22 +240,22 @@ const ProductDetail = () => {
                 <div className="flex items-start space-x-3">
                   <Shield className="h-5 w-5 text-gold flex-shrink-0 mt-1" />
                   <div>
-                    <p className="font-semibold text-sm">Quality Guarantee</p>
-                    <p className="text-xs text-muted-foreground">Premium materials</p>
+                    <p className="font-semibold text-sm">{t("product.additionalInfo.quality.title")}</p>
+                    <p className="text-xs text-muted-foreground">{t("product.additionalInfo.quality.description")}</p>
                   </div>
                 </div>
                 <div className="flex items-start space-x-3">
                   <Truck className="h-5 w-5 text-gold flex-shrink-0 mt-1" />
                   <div>
-                    <p className="font-semibold text-sm">Free Shipping</p>
-                    <p className="text-xs text-muted-foreground">On orders over $100</p>
+                    <p className="font-semibold text-sm">{t("product.additionalInfo.shipping.title")}</p>
+                    <p className="text-xs text-muted-foreground">{t("product.additionalInfo.shipping.description")}</p>
                   </div>
                 </div>
                 <div className="flex items-start space-x-3">
                   <Award className="h-5 w-5 text-gold flex-shrink-0 mt-1" />
                   <div>
-                    <p className="font-semibold text-sm">Pro Approved</p>
-                    <p className="text-xs text-muted-foreground">Used by champions</p>
+                    <p className="font-semibold text-sm">{t("product.additionalInfo.approval.title")}</p>
+                    <p className="text-xs text-muted-foreground">{t("product.additionalInfo.approval.description")}</p>
                   </div>
                 </div>
               </div>

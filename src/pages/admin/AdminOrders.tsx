@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ordersAPI } from "@/lib/api";
 import { logActivity } from "@/lib/activityLogger";
+import { useTranslation } from "react-i18next";
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -17,6 +18,7 @@ export default function AdminOrders() {
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
 
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   useEffect(() => {
     loadOrders();
@@ -33,8 +35,8 @@ export default function AdminOrders() {
     } catch (error: any) {
       console.error("Error loading orders:", error);
       toast({
-        title: "Error",
-        description: "Failed to load orders",
+        title: t("common.error"),
+        description: t("adminPanel.orders.toast.loadError"),
         variant: "destructive",
       });
     } finally {
@@ -69,14 +71,14 @@ export default function AdminOrders() {
       }
 
       toast({
-        title: "Status Updated",
-        description: "Order status has been updated successfully",
+        title: t("adminPanel.orders.statusToast.title"),
+        description: t("adminPanel.orders.statusToast.desc"),
       });
     } catch (error: any) {
       console.error("Error updating status:", error);
       toast({
-        title: "Error",
-        description: "Failed to update order status",
+        title: t("adminPanel.orders.statusToast.errorTitle"),
+        description: t("adminPanel.orders.statusToast.errorDesc"),
         variant: "destructive",
       });
     }
@@ -90,7 +92,15 @@ export default function AdminOrders() {
       delivered: "default",
       cancelled: "destructive",
     };
-    return <Badge variant={variants[status?.toLowerCase()] || "default"}>{status || "pending"}</Badge>;
+    const labelMap: Record<string, string> = {
+      pending: t("adminPanel.orders.statusOptions.pending"),
+      processing: t("adminPanel.orders.statusOptions.processing"),
+      shipped: t("adminPanel.orders.statusOptions.shipped"),
+      delivered: t("adminPanel.orders.statusOptions.delivered"),
+      cancelled: t("adminPanel.orders.statusOptions.cancelled"),
+    };
+    const lower = status?.toLowerCase() || "pending";
+    return <Badge variant={variants[lower] || "default"}>{labelMap[lower] || labelMap.pending}</Badge>;
   };
 
   if (loading) {
@@ -108,13 +118,13 @@ export default function AdminOrders() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-display font-bold">Orders</h1>
-            <p className="text-muted-foreground mt-1">Manage customer orders</p>
+            <h1 className="text-3xl font-display font-bold">{t("adminPanel.orders.title")}</h1>
+            <p className="text-muted-foreground mt-1">{t("adminPanel.orders.subtitle")}</p>
           </div>
           <div className="flex items-center gap-2">
             <Package className="h-5 w-5 text-primary" />
             <span className="text-2xl font-bold">{orders.length}</span>
-            <span className="text-muted-foreground">Total Orders</span>
+            <span className="text-muted-foreground">{t("adminPanel.orders.total")}</span>
           </div>
         </div>
 
@@ -122,19 +132,19 @@ export default function AdminOrders() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Order #</TableHead>
-                <TableHead>Customer</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Total</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>{t("adminPanel.orders.table.columns.order")}</TableHead>
+                <TableHead>{t("adminPanel.orders.table.columns.customer")}</TableHead>
+                <TableHead>{t("adminPanel.orders.table.columns.date")}</TableHead>
+                <TableHead>{t("adminPanel.orders.table.columns.total")}</TableHead>
+                <TableHead>{t("adminPanel.orders.table.columns.status")}</TableHead>
+                <TableHead>{t("adminPanel.orders.table.columns.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {orders.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                    No orders yet
+                    {t("adminPanel.orders.table.empty")}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -157,7 +167,7 @@ export default function AdminOrders() {
                         onClick={() => handleViewOrder(order)}
                       >
                         <Eye className="h-4 w-4 mr-2" />
-                        View
+                        {t("adminPanel.orders.buttons.view")}
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -171,39 +181,39 @@ export default function AdminOrders() {
       <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrder(null)}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle>Order Details - #{selectedOrder?.orderId}</DialogTitle>
+            <DialogTitle>{t("adminPanel.orders.dialog.title", { id: selectedOrder?.orderId })}</DialogTitle>
           </DialogHeader>
           {selectedOrder && (
             <div className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <h3 className="font-semibold mb-2">Customer Information</h3>
+                  <h3 className="font-semibold mb-2">{t("adminPanel.orders.dialog.customerInfo")}</h3>
                   <p className="text-sm">{selectedOrder.email}</p>
                   <p className="text-sm text-muted-foreground">{selectedOrder.phoneNum || "-"}</p>
                 </div>
                 <div>
-                  <h3 className="font-semibold mb-2">Order Information</h3>
-                  <p className="text-sm"><span className="font-medium">Date:</span> {new Date(selectedOrder.orderDate || selectedOrder.createdAt || Date.now()).toLocaleString()}</p>
-                  <p className="text-sm"><span className="font-medium">Payment Method:</span> {selectedOrder.paymentMethod || "-"}</p>
-                  <p className="text-sm"><span className="font-medium">Payment Status:</span> {selectedOrder.paymentStatus || "-"}</p>
+                  <h3 className="font-semibold mb-2">{t("adminPanel.orders.dialog.orderInfo")}</h3>
+                  <p className="text-sm"><span className="font-medium">{t("adminPanel.orders.dialog.fields.date")}</span> {new Date(selectedOrder.orderDate || selectedOrder.createdAt || Date.now()).toLocaleString()}</p>
+                  <p className="text-sm"><span className="font-medium">{t("adminPanel.orders.dialog.fields.paymentMethod")}</span> {selectedOrder.paymentMethod || "-"}</p>
+                  <p className="text-sm"><span className="font-medium">{t("adminPanel.orders.dialog.fields.paymentStatus")}</span> {selectedOrder.paymentStatus || "-"}</p>
                 </div>
               </div>
               <div>
-                <h3 className="font-semibold mb-2">Shipping Address</h3>
+                <h3 className="font-semibold mb-2">{t("adminPanel.orders.dialog.shipping")}</h3>
                 <p className="text-sm">{selectedOrder.address || "-"}</p>
               </div>
 
               <div>
-                <h3 className="font-semibold mb-2">Order Items</h3>
+                <h3 className="font-semibold mb-2">{t("adminPanel.orders.dialog.items")}</h3>
                 {selectedOrder.orderItems ? (
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Product</TableHead>
-                        <TableHead>Variant</TableHead>
-                        <TableHead>Quantity</TableHead>
-                        <TableHead>Price</TableHead>
-                        <TableHead>Total</TableHead>
+                        <TableHead>{t("adminPanel.orders.dialog.fields.product") || "Product"}</TableHead>
+                        <TableHead>{t("adminPanel.orders.dialog.fields.variant") || "Variant"}</TableHead>
+                        <TableHead>{t("adminPanel.orders.dialog.fields.quantity")}</TableHead>
+                        <TableHead>{t("adminPanel.orders.dialog.fields.price")}</TableHead>
+                        <TableHead>{t("adminPanel.orders.dialog.fields.lineTotal")}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -226,7 +236,7 @@ export default function AdminOrders() {
                       ) : (
                         <TableRow>
                           <TableCell colSpan={5} className="text-center py-4 text-muted-foreground">
-                            No items found
+                            {t("adminPanel.orders.table.empty")}
                           </TableCell>
                         </TableRow>
                       )}
@@ -235,8 +245,8 @@ export default function AdminOrders() {
                 ) : (
                   <div className="text-center py-8 text-muted-foreground bg-muted/50 rounded-lg">
                     <Package className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                    <p className="text-sm">Order items details are not available in this view.</p>
-                    <p className="text-xs mt-1">The order items are not embedded in the current API response.</p>
+                    <p className="text-sm">{t("adminPanel.orders.dialog.itemsEmptyTitle")}</p>
+                    <p className="text-xs mt-1">{t("adminPanel.orders.dialog.itemsEmptySubtitle")}</p>
                   </div>
                 )}
               </div>
@@ -244,7 +254,7 @@ export default function AdminOrders() {
               <div className="flex justify-between items-center pt-4 border-t">
                 <div className="space-y-2">
                   <div className="flex items-center gap-4">
-                    <span className="font-semibold">Status:</span>
+                    <span className="font-semibold">{t("adminPanel.orders.dialog.fields.status")}</span>
                     <Select
                       value={selectedOrder.orderStatus || "pending"}
                       onValueChange={(value) => handleStatusUpdate(selectedOrder.orderId, value)}
@@ -253,17 +263,17 @@ export default function AdminOrders() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="processing">Processing</SelectItem>
-                        <SelectItem value="shipped">Shipped</SelectItem>
-                        <SelectItem value="delivered">Delivered</SelectItem>
-                        <SelectItem value="cancelled">Cancelled</SelectItem>
+                        <SelectItem value="pending">{t("adminPanel.orders.statusOptions.pending")}</SelectItem>
+                        <SelectItem value="processing">{t("adminPanel.orders.statusOptions.processing")}</SelectItem>
+                        <SelectItem value="shipped">{t("adminPanel.orders.statusOptions.shipped")}</SelectItem>
+                        <SelectItem value="delivered">{t("adminPanel.orders.statusOptions.delivered")}</SelectItem>
+                        <SelectItem value="cancelled">{t("adminPanel.orders.statusOptions.cancelled")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-lg font-bold mt-2">Total: ${Number(selectedOrder.totalPrice || 0).toFixed(2)}</p>
+                  <p className="text-lg font-bold mt-2">{t("adminPanel.orders.dialog.fields.total")} ${Number(selectedOrder.totalPrice || 0).toFixed(2)}</p>
                 </div>
               </div>
             </div>

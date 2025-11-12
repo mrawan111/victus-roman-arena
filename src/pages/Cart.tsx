@@ -4,9 +4,11 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
+import { useTranslation } from "react-i18next";
 
 const Cart = () => {
   const { items, removeFromCart, updateQuantity, totalPrice } = useCart();
+  const { t } = useTranslation();
 
   if (items.length === 0) {
     return (
@@ -16,13 +18,13 @@ const Cart = () => {
           <div className="text-center">
             <ShoppingBag className="h-24 w-24 text-muted-foreground mx-auto mb-6" />
             <h1 className="text-4xl font-display font-bold text-primary mb-4">
-              Your Cart is Empty
+              {t("cart.empty.title")}
             </h1>
             <p className="text-lg text-muted-foreground mb-8">
-              Add some items to your cart to continue shopping
+              {t("cart.empty.description")}
             </p>
             <Button asChild className="gradient-roman">
-              <Link to="/shop">Browse Products</Link>
+              <Link to="/shop">{t("cart.empty.cta")}</Link>
             </Button>
           </div>
         </div>
@@ -38,7 +40,7 @@ const Cart = () => {
       <section className="py-12 sm:py-16 gradient-roman">
         <div className="container mx-auto px-4">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold text-white mb-3 sm:mb-4 text-center">
-            Shopping Cart
+            {t("cart.title")}
           </h1>
         </div>
       </section>
@@ -110,27 +112,27 @@ const Cart = () => {
             <div className="lg:col-span-1">
               <div className="p-4 sm:p-6 rounded-lg border bg-card shadow-elegant lg:sticky lg:top-24">
                 <h2 className="text-2xl font-display font-bold text-primary mb-6">
-                  Order Summary
+                  {t("cart.summary.title")}
                 </h2>
                 <div className="space-y-4 mb-6">
                   <div className="flex justify-between text-muted-foreground">
-                    <span>Subtotal</span>
+                    <span>{t("cart.summary.subtotal")}</span>
                     <span>${totalPrice.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-muted-foreground">
-                    <span>Shipping</span>
-                    <span>Free</span>
+                    <span>{t("cart.summary.shipping")}</span>
+                    <span>{t("cart.summary.free")}</span>
                   </div>
                   <div className="border-t pt-4 flex justify-between text-xl font-bold text-primary">
-                    <span>Total</span>
+                    <span>{t("cart.summary.total")}</span>
                     <span>${totalPrice.toFixed(2)}</span>
                   </div>
                 </div>
                 <Button asChild className="w-full gradient-roman text-lg py-6">
-                  <Link to="/checkout">Proceed to Checkout</Link>
+                  <Link to="/checkout">{t("cart.summary.checkout")}</Link>
                 </Button>
                 <Button asChild variant="outline" className="w-full mt-4">
-                  <Link to="/shop">Continue Shopping</Link>
+                  <Link to="/shop">{t("cart.summary.continue")}</Link>
                 </Button>
               </div>
             </div>

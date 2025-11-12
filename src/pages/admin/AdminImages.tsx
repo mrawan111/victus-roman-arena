@@ -23,6 +23,7 @@ import { Label } from "@/components/ui/label";
 import { imagesAPI, productsAPI } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { logActivity } from "@/lib/activityLogger";
+import { useTranslation } from "react-i18next";
 
 export default function AdminImages() {
   const [images, setImages] = useState<any[]>([]);
@@ -37,6 +38,7 @@ export default function AdminImages() {
     isPrimary: false,
   });
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   useEffect(() => {
     loadData();
@@ -54,8 +56,8 @@ export default function AdminImages() {
     } catch (error: any) {
       console.error("Error loading data:", error);
       toast({
-        title: "Error",
-        description: "Failed to load images",
+        title: t("common.error"),
+        description: t("adminPanel.images.toast.loadError"),
         variant: "destructive",
       });
     } finally {
@@ -74,20 +76,20 @@ export default function AdminImages() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this image?")) return;
+    if (!confirm(t("adminPanel.images.confirmDelete"))) return;
 
     try {
       await imagesAPI.delete(id);
       await logActivity("DELETE", "PRODUCT", undefined, `Deleted image ID: ${id}`);
       toast({
-        title: "Success",
-        description: "Image deleted successfully",
+        title: t("common.success"),
+        description: t("adminPanel.images.toast.deleteSuccess"),
       });
       loadData();
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to delete image",
+        title: t("common.error"),
+        description: error.message || t("adminPanel.images.toast.deleteError"),
         variant: "destructive",
       });
     }
@@ -97,8 +99,8 @@ export default function AdminImages() {
     e.preventDefault();
     if (!formData.productId || !formData.imageUrl) {
       toast({
-        title: "Error",
-        description: "Product ID and Image URL are required",
+        title: t("common.error"),
+        description: t("adminPanel.images.toast.missingFields"),
         variant: "destructive",
       });
       return;
@@ -113,15 +115,15 @@ export default function AdminImages() {
       });
       await logActivity("CREATE", "PRODUCT", parseInt(formData.productId), `Added image to product ID: ${formData.productId}`);
       toast({
-        title: "Success",
-        description: "Image created successfully",
+        title: t("common.success"),
+        description: t("adminPanel.images.toast.createSuccess"),
       });
       setIsDialogOpen(false);
       loadData();
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to create image",
+        title: t("common.error"),
+        description: error.message || t("adminPanel.images.toast.createError"),
         variant: "destructive",
       });
     }
@@ -137,7 +139,7 @@ export default function AdminImages() {
 
   const getProductName = (productId: number) => {
     const product = products.find((p) => p.productId === productId);
-    return product?.productName || `Product #${productId}`;
+    return product?.productName || t("adminPanel.images.productFallback", { id: productId });
   };
 
   return (
@@ -145,23 +147,23 @@ export default function AdminImages() {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-display font-bold">Images</h1>
-            <p className="text-muted-foreground mt-1">Manage product and variant images</p>
+            <h1 className="text-3xl font-display font-bold">{t("adminPanel.images.title")}</h1>
+            <p className="text-muted-foreground mt-1">{t("adminPanel.images.subtitle")}</p>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button onClick={handleCreate}>
                 <Plus className="mr-2 h-4 w-4" />
-                Add Image
+                {t("adminPanel.images.addButton")}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Add Image</DialogTitle>
+                <DialogTitle>{t("adminPanel.images.dialog.title")}</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="productId">Product *</Label>
+                  <Label htmlFor="productId">{t("adminPanel.images.dialog.fields.product.label")}</Label>
                   <select
                     id="productId"
                     value={formData.productId}
@@ -171,7 +173,7 @@ export default function AdminImages() {
                     className="w-full px-3 py-2 border rounded-md"
                     required
                   >
-                    <option value="">Select Product</option>
+                    <option value="">{t("adminPanel.images.dialog.fields.product.placeholder")}</option>
                     {products.map((product) => (
                       <option key={product.productId} value={product.productId}>
                         {product.productName}
@@ -180,19 +182,19 @@ export default function AdminImages() {
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="imageUrl">Image URL *</Label>
+                  <Label htmlFor="imageUrl">{t("adminPanel.images.dialog.fields.imageUrl.label")}</Label>
                   <Input
                     id="imageUrl"
                     value={formData.imageUrl}
                     onChange={(e) =>
                       setFormData({ ...formData, imageUrl: e.target.value })
                     }
-                    placeholder="https://example.com/image.jpg"
+                    placeholder={t("adminPanel.images.dialog.fields.imageUrl.placeholder")}
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="variantId">Variant ID (Optional)</Label>
+                  <Label htmlFor="variantId">{t("adminPanel.images.dialog.fields.variantId.label")}</Label>
                   <Input
                     id="variantId"
                     type="number"
@@ -200,7 +202,7 @@ export default function AdminImages() {
                     onChange={(e) =>
                       setFormData({ ...formData, variantId: e.target.value })
                     }
-                    placeholder="Variant ID"
+                    placeholder={t("adminPanel.images.dialog.fields.variantId.placeholder")}
                   />
                 </div>
                 <div className="flex items-center space-x-2">
@@ -213,7 +215,7 @@ export default function AdminImages() {
                     }
                     className="rounded"
                   />
-                  <Label htmlFor="isPrimary">Set as Primary Image</Label>
+                  <Label htmlFor="isPrimary">{t("adminPanel.images.dialog.fields.primary.label")}</Label>
                 </div>
                 <div className="flex justify-end gap-2">
                   <Button
@@ -221,9 +223,9 @@ export default function AdminImages() {
                     variant="outline"
                     onClick={() => setIsDialogOpen(false)}
                   >
-                    Cancel
+                    {t("adminPanel.images.dialog.cancel")}
                   </Button>
-                  <Button type="submit">Create</Button>
+                  <Button type="submit">{t("adminPanel.images.dialog.create")}</Button>
                 </div>
               </form>
             </DialogContent>
@@ -234,7 +236,7 @@ export default function AdminImages() {
           <div className="flex items-center gap-2">
             <Search className="h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search by product name or image URL..."
+              placeholder={t("adminPanel.images.searchPlaceholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="max-w-sm"
@@ -246,19 +248,19 @@ export default function AdminImages() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Image</TableHead>
-                <TableHead>Product</TableHead>
-                <TableHead>Variant</TableHead>
-                <TableHead>URL</TableHead>
-                <TableHead>Primary</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>{t("adminPanel.images.table.columns.image")}</TableHead>
+                <TableHead>{t("adminPanel.images.table.columns.product")}</TableHead>
+                <TableHead>{t("adminPanel.images.table.columns.variant")}</TableHead>
+                <TableHead>{t("adminPanel.images.table.columns.url")}</TableHead>
+                <TableHead>{t("adminPanel.images.table.columns.primary")}</TableHead>
+                <TableHead>{t("adminPanel.images.table.columns.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-8">
-                    Loading images...
+                    {t("adminPanel.images.table.loading")}
                   </TableCell>
                 </TableRow>
               ) : filteredImages.length === 0 ? (
@@ -268,10 +270,10 @@ export default function AdminImages() {
                       <ImageIcon className="h-12 w-12 text-muted-foreground" />
                       <div>
                         <p className="text-lg font-semibold text-muted-foreground">
-                          No images found
+                          {t("adminPanel.images.table.emptyTitle")}
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          Add images to products to display them in the store
+                          {t("adminPanel.images.table.emptySubtitle")}
                         </p>
                       </div>
                     </div>
@@ -310,7 +312,7 @@ export default function AdminImages() {
                     <TableCell>
                       {image.isPrimary ? (
                         <span className="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
-                          Primary
+                          {t("adminPanel.images.table.primary")}
                         </span>
                       ) : (
                         "-"

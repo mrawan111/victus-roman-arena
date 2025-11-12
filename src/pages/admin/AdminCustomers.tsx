@@ -14,12 +14,14 @@ import {
 } from "@/components/ui/table";
 import { accountsAPI } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 export default function AdminCustomers() {
   const [customers, setCustomers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   useEffect(() => {
     loadCustomers();
@@ -32,8 +34,8 @@ export default function AdminCustomers() {
     } catch (error: any) {
       console.error("Error loading customers:", error);
       toast({
-        title: "Error",
-        description: "Failed to load customers",
+        title: t("common.error"),
+        description: t("adminPanel.customers.table.loading"),
         variant: "destructive",
       });
     } finally {
@@ -53,8 +55,8 @@ export default function AdminCustomers() {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-display font-bold">Customers</h1>
-            <p className="text-muted-foreground mt-1">Manage customer information</p>
+            <h1 className="text-3xl font-display font-bold">{t("adminPanel.customers.title")}</h1>
+            <p className="text-muted-foreground mt-1">{t("adminPanel.customers.subtitle")}</p>
           </div>
         </div>
 
@@ -62,7 +64,7 @@ export default function AdminCustomers() {
           <div className="flex items-center gap-2">
             <Search className="h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search customers by email or name..."
+              placeholder={t("adminPanel.customers.searchPlaceholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="max-w-sm"
@@ -74,25 +76,25 @@ export default function AdminCustomers() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Customer</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Seller Account</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>{t("adminPanel.customers.table.columns.customer")}</TableHead>
+                <TableHead>{t("adminPanel.customers.table.columns.email")}</TableHead>
+                <TableHead>{t("adminPanel.customers.table.columns.phone")}</TableHead>
+                <TableHead>{t("adminPanel.customers.table.columns.seller")}</TableHead>
+                <TableHead>{t("adminPanel.customers.table.columns.status")}</TableHead>
+                <TableHead>{t("adminPanel.customers.table.columns.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-8">
-                    Loading customers...
+                    {t("adminPanel.customers.table.loading")}
                   </TableCell>
                 </TableRow>
               ) : filteredCustomers.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-8">
-                    No customers found
+                    {t("adminPanel.customers.table.empty")}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -130,7 +132,7 @@ export default function AdminCustomers() {
                             : "bg-gray-100 text-gray-800"
                         }`}
                       >
-                        {customer.sellerAccount ? "Yes" : "No"}
+                        {customer.sellerAccount ? t("adminPanel.customers.status.yes") : t("adminPanel.customers.status.no")}
                       </span>
                     </TableCell>
                     <TableCell>
@@ -141,12 +143,12 @@ export default function AdminCustomers() {
                             : "bg-red-100 text-red-800"
                         }`}
                       >
-                        {customer.isActive !== false ? "Active" : "Inactive"}
+                        {customer.isActive !== false ? t("adminPanel.customers.status.active") : t("adminPanel.customers.status.inactive")}
                       </span>
                     </TableCell>
                     <TableCell>
                       <Button variant="ghost" size="sm">
-                        View
+                        {t("adminPanel.customers.buttons.view")}
                       </Button>
                     </TableCell>
                   </TableRow>

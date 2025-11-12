@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { Mail, Lock, User, Phone, UserPlus } from "lucide-react";
 import { authAPI } from "@/lib/api";
+import { useTranslation } from "react-i18next";
 
 export default function Signup() {
   const [formData, setFormData] = useState({
@@ -22,6 +23,7 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   useEffect(() => {
     // Check if user is already logged in
@@ -44,8 +46,8 @@ export default function Signup() {
     // Validate passwords match
     if (formData.password !== formData.confirmPassword) {
       toast({
-        title: "Password Mismatch",
-        description: "Passwords do not match. Please try again.",
+        title: t("auth.signup.toastPasswordMismatchTitle"),
+        description: t("auth.signup.toastPasswordMismatchDescription"),
         variant: "destructive",
       });
       return;
@@ -54,8 +56,8 @@ export default function Signup() {
     // Validate password strength
     if (formData.password.length < 6) {
       toast({
-        title: "Weak Password",
-        description: "Password must be at least 6 characters long.",
+        title: t("auth.signup.toastWeakPasswordTitle"),
+        description: t("auth.signup.toastWeakPasswordDescription"),
         variant: "destructive",
       });
       return;
@@ -85,15 +87,15 @@ export default function Signup() {
       }));
 
       toast({
-        title: "Account Created!",
-        description: "Your account has been created successfully. Welcome!",
+      title: t("auth.signup.toastSuccessTitle"),
+      description: t("auth.signup.toastSuccessDescription"),
       });
       
       navigate("/");
     } catch (error: any) {
       toast({
-        title: "Signup Failed",
-        description: error.message || "Failed to create account. Please try again.",
+      title: t("auth.signup.toastErrorTitle"),
+      description: error.message || t("auth.signup.toastErrorDescription"),
         variant: "destructive",
       });
     } finally {
@@ -118,23 +120,23 @@ export default function Signup() {
             <div className="flex justify-center mb-4">
               <UserPlus className="h-12 w-12 text-primary" />
             </div>
-            <CardTitle className="text-2xl font-display">Create Account</CardTitle>
+            <CardTitle className="text-2xl font-display">{t("auth.signup.title")}</CardTitle>
             <CardDescription>
-              Sign up to start shopping for premium martial arts equipment
+              {t("auth.signup.description")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSignup} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="firstName">First Name</Label>
+                  <Label htmlFor="firstName">{t("forms.firstName")}</Label>
                   <div className="relative">
                     <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="firstName"
                       name="firstName"
                       type="text"
-                      placeholder="John"
+                      placeholder={t("placeholders.name")}
                       className="pl-10"
                       value={formData.firstName}
                       onChange={handleChange}
@@ -144,12 +146,12 @@ export default function Signup() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="lastName">Last Name</Label>
+                  <Label htmlFor="lastName">{t("forms.lastName")}</Label>
                   <Input
                     id="lastName"
                     name="lastName"
                     type="text"
-                    placeholder="Doe"
+                    placeholder={t("placeholders.name")}
                     value={formData.lastName}
                     onChange={handleChange}
                     required
@@ -158,14 +160,14 @@ export default function Signup() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t("forms.email")}</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="email"
                     name="email"
                     type="email"
-                    placeholder="your@email.com"
+                    placeholder={t("placeholders.email")}
                     className="pl-10"
                     value={formData.email}
                     onChange={handleChange}
@@ -175,14 +177,14 @@ export default function Signup() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="phoneNum">Phone Number (Optional)</Label>
+                <Label htmlFor="phoneNum">{t("forms.phoneOptional")}</Label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="phoneNum"
                     name="phoneNum"
                     type="tel"
-                    placeholder="+1 (555) 123-4567"
+                    placeholder={t("placeholders.phone")}
                     className="pl-10"
                     value={formData.phoneNum}
                     onChange={handleChange}
@@ -191,14 +193,14 @@ export default function Signup() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t("forms.password")}</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="password"
                     name="password"
                     type="password"
-                    placeholder="••••••••"
+                    placeholder={t("placeholders.password")}
                     className="pl-10"
                     value={formData.password}
                     onChange={handleChange}
@@ -208,14 +210,14 @@ export default function Signup() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Label htmlFor="confirmPassword">{t("forms.confirmPassword")}</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="confirmPassword"
                     name="confirmPassword"
                     type="password"
-                    placeholder="••••••••"
+                    placeholder={t("placeholders.password")}
                     className="pl-10"
                     value={formData.confirmPassword}
                     onChange={handleChange}
@@ -225,19 +227,19 @@ export default function Signup() {
                 </div>
               </div>
               <Button type="submit" className="w-full gradient-roman" disabled={loading}>
-                {loading ? "Creating Account..." : "Sign Up"}
+                {loading ? t("auth.signup.loading") : t("auth.signup.cta")}
               </Button>
             </form>
             <div className="mt-6 text-center text-sm space-y-2">
               <p className="text-muted-foreground">
-                Already have an account?{" "}
+                {t("auth.signup.haveAccount")}{" "}
                 <Link to="/login" className="text-primary hover:underline font-medium">
-                  Sign in
+                  {t("auth.signup.signinLink")}
                 </Link>
               </p>
               <p className="text-muted-foreground">
                 <Link to="/auth" className="text-primary hover:underline">
-                  Admin Login
+                  {t("auth.signup.adminLink")}
                 </Link>
               </p>
             </div>

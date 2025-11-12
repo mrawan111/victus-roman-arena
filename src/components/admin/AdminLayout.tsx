@@ -5,6 +5,7 @@ import { LogOut, Menu } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import AdminSidebar from "./AdminSidebar";
+import { useTranslation } from "react-i18next";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -15,6 +16,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const checkAuth = () => {
@@ -44,8 +46,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const handleLogout = () => {
     localStorage.removeItem("adminSession");
     toast({
-      title: "Logged out",
-      description: "You've been successfully logged out",
+      title: t("auth.loggedOut"),
+      description: t("auth.loggedOutDesc"),
     });
     navigate("/");
   };
@@ -55,7 +57,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Loading...</p>
+          <p className="mt-4 text-muted-foreground">{t("adminPanel.layout.loading")}</p>
         </div>
       </div>
     );
@@ -67,7 +69,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       <aside className="hidden lg:block w-64 border-r bg-card">
         <div className="h-full flex flex-col">
           <div className="p-6 border-b">
-            <h1 className="text-2xl font-display font-bold text-primary">Victus Admin</h1>
+            <h1 className="text-2xl font-display font-bold text-primary">{t("adminPanel.layout.title")}</h1>
             <p className="text-sm text-muted-foreground mt-1">{user?.email}</p>
           </div>
           <AdminSidebar />
@@ -86,17 +88,17 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               </SheetTrigger>
               <SheetContent side="left" className="p-0 w-64">
                 <div className="p-6 border-b">
-                  <h1 className="text-2xl font-display font-bold text-primary">Victus Admin</h1>
+                  <h1 className="text-2xl font-display font-bold text-primary">{t("adminPanel.layout.title")}</h1>
                   <p className="text-sm text-muted-foreground mt-1">{user?.email}</p>
                 </div>
                 <AdminSidebar />
               </SheetContent>
             </Sheet>
-            <h2 className="text-xl font-semibold hidden lg:block">Dashboard</h2>
+            <h2 className="text-xl font-semibold hidden lg:block">{t("adminPanel.layout.header")}</h2>
           </div>
           <Button variant="outline" onClick={handleLogout} size="sm">
             <LogOut className="mr-2 h-4 w-4" />
-            Logout
+            {t("adminPanel.layout.logout")}
           </Button>
         </header>
 

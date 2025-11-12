@@ -15,6 +15,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useTranslation } from "react-i18next";
 
 interface ProductCardProps {
   variantId: number;
@@ -27,8 +28,18 @@ interface ProductCardProps {
   variantDetails?: string;
 }
 
-const ProductCard = ({ variantId, productId, name, price, image, category, inStock = true, variantDetails }: ProductCardProps) => {
+const ProductCard = ({
+  variantId,
+  productId,
+  name,
+  price,
+  image,
+  category,
+  inStock = true,
+  variantDetails,
+}: ProductCardProps) => {
   const { addToCart } = useCart();
+  const { t } = useTranslation();
   
   return (
     <Card className="group overflow-hidden shadow-elegant hover:shadow-gold transition-all duration-300 hover:-translate-y-1">
@@ -44,7 +55,7 @@ const ProductCard = ({ variantId, productId, name, price, image, category, inSto
           </Badge>
           {!inStock && (
             <Badge className="absolute top-4 right-4 bg-destructive text-destructive-foreground">
-              Out of Stock
+              {t("productCard.outOfStock")}
             </Badge>
           )}
         </div>
@@ -69,28 +80,35 @@ const ProductCard = ({ variantId, productId, name, price, image, category, inSto
               disabled={!inStock}
             >
               <ShoppingCart className="mr-2 h-4 w-4" />
-              {inStock ? "Add to Cart" : "Out of Stock"}
+              {inStock ? t("productCard.addToCart") : t("productCard.outOfStock")}
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Confirm Add to Cart</AlertDialogTitle>
+              <AlertDialogTitle>{t("productCard.confirmTitle")}</AlertDialogTitle>
               <AlertDialogDescription className="space-y-2">
-                <strong>Product:</strong> {name}<br />
-                <strong>Price:</strong> ${price}<br />
-                {variantDetails && <><strong>Variant:</strong> {variantDetails}<br /></>}
-                <strong>Category:</strong> {category}
+                <strong>{t("productCard.product")}</strong> {name}
+                <br />
+                <strong>{t("productCard.price")}</strong> ${price}
+                <br />
+                {variantDetails && (
+                  <>
+                    <strong>{t("productCard.variant")}</strong> {variantDetails}
+                    <br />
+                  </>
+                )}
+                <strong>{t("productCard.category")}</strong> {category}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogCancel>{t("productCard.cancel")}</AlertDialogCancel>
               <AlertDialogAction
                 onClick={(e) => {
                   e.preventDefault();
                   addToCart({ variantId, productId, name, price, image, category, variantDetails });
                 }}
               >
-                Confirm Add to Cart
+                {t("productCard.confirm")}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

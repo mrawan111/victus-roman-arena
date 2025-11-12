@@ -8,7 +8,8 @@ import { Label } from "@/components/ui/label";
 import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
 import { ordersAPI, cartAPI, cartProductsAPI, couponsAPI } from "@/lib/api";
-import { Tag, X, CheckCircle, Package, Truck } from "lucide-react";
+import { Tag, X, CheckCircle, Package } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface OrderItem {
   id: number;
@@ -50,6 +51,7 @@ const Checkout = () => {
   const { items, totalPrice, clearCart } = useCart();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<{
     code: string;
@@ -87,8 +89,8 @@ const Checkout = () => {
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) {
       toast({
-        title: "Invalid Coupon",
-        description: "Please enter a coupon code",
+        title: t("checkout.toasts.couponInvalidTitle"),
+        description: t("checkout.toasts.couponInvalidDescription"),
         variant: "destructive",
       });
       return;
@@ -104,21 +106,23 @@ const Checkout = () => {
           finalAmount: result.final_amount!,
         });
         toast({
-          title: "Coupon Applied!",
-          description: `You saved $${result.discount?.toFixed(2)}`,
+          title: t("checkout.coupon.applied"),
+          description: t("checkout.coupon.savedAmount", {
+            amount: result.discount?.toFixed(2) ?? "0.00",
+          }),
         });
         setCouponCode("");
       } else {
         toast({
-          title: "Invalid Coupon",
-          description: result.error || "This coupon cannot be applied",
+          title: t("checkout.toasts.couponErrorTitle"),
+          description: result.error || t("checkout.toasts.couponErrorDescription"),
           variant: "destructive",
         });
       }
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to validate coupon",
+        title: t("checkout.toasts.couponNetworkErrorTitle"),
+        description: error.message || t("checkout.toasts.couponNetworkErrorDescription"),
         variant: "destructive",
       });
     } finally {
@@ -142,8 +146,8 @@ const Checkout = () => {
     
     if (emptyFields.length > 0) {
       toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields",
+        title: t("checkout.toasts.missingInfoTitle"),
+        description: t("checkout.toasts.missingInfoDescription"),
         variant: "destructive",
       });
       return;
@@ -225,16 +229,19 @@ const Checkout = () => {
       setShowOrderConfirmation(true);
 
       toast({
-        title: "Order Placed Successfully!",
-        description: `Order #${order.orderId} placed. Total: $${order.totalPrice.toFixed(2)}`,
+        title: t("checkout.toasts.orderSuccessTitle"),
+        description: t("checkout.toasts.orderSuccessDescription", {
+          orderId: order.orderId,
+          total: order.totalPrice.toFixed(2),
+        }),
       });
 
       clearCart();
     } catch (error: any) {
       console.error("Error placing order:", error);
       toast({
-        title: "Order Failed",
-        description: error.message || "Failed to place order. Please try again.",
+        title: t("checkout.toasts.orderErrorTitle"),
+        description: error.message || t("checkout.toasts.orderErrorDescription"),
         variant: "destructive",
       });
     }
@@ -249,7 +256,7 @@ const Checkout = () => {
       <section className="py-12 sm:py-16 gradient-roman">
         <div className="container mx-auto px-4">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold text-white mb-3 sm:mb-4 text-center">
-            Checkout
+            {t("checkout.title")}
           </h1>
         </div>
       </section>
@@ -263,31 +270,33 @@ const Checkout = () => {
                 {/* Contact Information */}
                 <div className="p-4 sm:p-6 rounded-lg border bg-card shadow-sm">
                   <h2 className="text-xl sm:text-2xl font-display font-bold text-primary mb-4 sm:mb-6">
-                    Contact Information
+                    {t("checkout.sections.contact")}
                   </h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="firstName">First Name</Label>
+                      <Label htmlFor="firstName">{t("forms.firstName")}</Label>
                       <Input
                         id="firstName"
                         name="firstName"
                         value={formData.firstName}
                         onChange={handleChange}
                         required
+                        placeholder={t("placeholders.name")}
                       />
                     </div>
                     <div>
-                      <Label htmlFor="lastName">Last Name</Label>
+                      <Label htmlFor="lastName">{t("forms.lastName")}</Label>
                       <Input
                         id="lastName"
                         name="lastName"
                         value={formData.lastName}
                         onChange={handleChange}
                         required
+                        placeholder={t("placeholders.name")}
                       />
                     </div>
                     <div>
-                      <Label htmlFor="email">Email</Label>
+                      <Label htmlFor="email">{t("forms.email")}</Label>
                       <Input
                         id="email"
                         name="email"
@@ -295,10 +304,11 @@ const Checkout = () => {
                         value={formData.email}
                         onChange={handleChange}
                         required
+                        placeholder={t("placeholders.email")}
                       />
                     </div>
                     <div>
-                      <Label htmlFor="phone">Phone</Label>
+                      <Label htmlFor="phone">{t("forms.phone")}</Label>
                       <Input
                         id="phone"
                         name="phone"
@@ -306,6 +316,7 @@ const Checkout = () => {
                         value={formData.phone}
                         onChange={handleChange}
                         required
+                        placeholder={t("placeholders.phone")}
                       />
                     </div>
                   </div>
@@ -314,48 +325,52 @@ const Checkout = () => {
                 {/* Shipping Address */}
                 <div className="p-4 sm:p-6 rounded-lg border bg-card shadow-sm">
                   <h2 className="text-xl sm:text-2xl font-display font-bold text-primary mb-4 sm:mb-6">
-                    Shipping Address
+                    {t("checkout.sections.shipping")}
                   </h2>
                   <div className="space-y-4">
                     <div>
-                      <Label htmlFor="address">Street Address</Label>
+                      <Label htmlFor="address">{t("forms.address")}</Label>
                       <Input
                         id="address"
                         name="address"
                         value={formData.address}
                         onChange={handleChange}
                         required
+                        placeholder={t("placeholders.address")}
                       />
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       <div>
-                        <Label htmlFor="city">City</Label>
+                        <Label htmlFor="city">{t("forms.city")}</Label>
                         <Input
                           id="city"
                           name="city"
                           value={formData.city}
                           onChange={handleChange}
                           required
+                          placeholder={t("placeholders.city")}
                         />
                       </div>
                       <div>
-                        <Label htmlFor="zipCode">ZIP Code</Label>
+                        <Label htmlFor="zipCode">{t("forms.zipCode")}</Label>
                         <Input
                           id="zipCode"
                           name="zipCode"
                           value={formData.zipCode}
                           onChange={handleChange}
                           required
+                          placeholder={t("placeholders.zipCode")}
                         />
                       </div>
                       <div>
-                        <Label htmlFor="country">Country</Label>
+                        <Label htmlFor="country">{t("forms.country")}</Label>
                         <Input
                           id="country"
                           name="country"
                           value={formData.country}
                           onChange={handleChange}
                           required
+                          placeholder={t("placeholders.country")}
                         />
                       </div>
                     </div>
@@ -365,25 +380,26 @@ const Checkout = () => {
                 {/* Payment Information */}
                 <div className="p-4 sm:p-6 rounded-lg border bg-card shadow-sm">
                   <h2 className="text-xl sm:text-2xl font-display font-bold text-primary mb-4 sm:mb-6">
-                    Payment Information
+                    {t("checkout.sections.payment")}
                   </h2>
                   <div className="space-y-4">
                     <div>
-                      <Label htmlFor="cardNumber">Card Number</Label>
+                      <Label htmlFor="cardNumber">{t("forms.cardNumber")}</Label>
                       <Input
                         id="cardNumber"
                         name="cardNumber"
-                        placeholder="1234 5678 9012 3456"
+                        placeholder={t("placeholders.cardNumber")}
                         value={formData.cardNumber}
                         onChange={handleChange}
                         required
                       />
                     </div>
                     <div>
-                      <Label htmlFor="cardName">Name on Card</Label>
+                      <Label htmlFor="cardName">{t("forms.cardName")}</Label>
                       <Input
                         id="cardName"
                         name="cardName"
+                        placeholder={t("placeholders.cardName")}
                         value={formData.cardName}
                         onChange={handleChange}
                         required
@@ -391,22 +407,22 @@ const Checkout = () => {
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="expiryDate">Expiry Date</Label>
+                        <Label htmlFor="expiryDate">{t("forms.expiryDate")}</Label>
                         <Input
                           id="expiryDate"
                           name="expiryDate"
-                          placeholder="MM/YY"
+                          placeholder={t("placeholders.expiryDate")}
                           value={formData.expiryDate}
                           onChange={handleChange}
                           required
                         />
                       </div>
                       <div>
-                        <Label htmlFor="cvv">CVV</Label>
+                        <Label htmlFor="cvv">{t("forms.cvv")}</Label>
                         <Input
                           id="cvv"
                           name="cvv"
-                          placeholder="123"
+                          placeholder={t("placeholders.cvv")}
                           value={formData.cvv}
                           onChange={handleChange}
                           required
@@ -421,13 +437,13 @@ const Checkout = () => {
               <div className="lg:col-span-1">
                 <div className="p-4 sm:p-6 rounded-lg border bg-card shadow-elegant lg:sticky lg:top-24">
                   <h2 className="text-xl sm:text-2xl font-display font-bold text-primary mb-4 sm:mb-6">
-                    Order Summary
+                    {t("checkout.sections.orderSummary")}
                   </h2>
                   <div className="space-y-4 mb-6">
                     {items.map((item) => (
                       <div key={item.variantId} className="flex justify-between text-sm">
                         <span className="text-muted-foreground">
-                          {item.name} {item.variantDetails ? `(${item.variantDetails})` : ''} x{item.quantity}
+                          {item.name} {item.variantDetails ? `(${item.variantDetails})` : ""} x{item.quantity}
                         </span>
                         <span className="font-semibold">
                           ${(item.price * item.quantity).toFixed(2)}
@@ -451,17 +467,20 @@ const Checkout = () => {
                             size="sm"
                             onClick={handleRemoveCoupon}
                             className="h-6 w-6 p-0"
+                            aria-label={t("checkout.coupon.remove")}
                           >
                             <X className="h-4 w-4" />
                           </Button>
                         </div>
                       ) : (
                         <div className="space-y-2">
-                          <Label htmlFor="couponCode" className="text-sm">Coupon Code</Label>
+                          <Label htmlFor="couponCode" className="text-sm">
+                            {t("checkout.coupon.label")}
+                          </Label>
                           <div className="flex gap-2">
                             <Input
                               id="couponCode"
-                              placeholder="Enter code"
+                              placeholder={t("checkout.coupon.placeholder")}
                               value={couponCode}
                               onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
                               onKeyDown={(e) => {
@@ -478,7 +497,7 @@ const Checkout = () => {
                               onClick={handleApplyCoupon}
                               disabled={validatingCoupon || !couponCode.trim()}
                             >
-                              {validatingCoupon ? "..." : "Apply"}
+                              {validatingCoupon ? t("checkout.coupon.validating") : t("checkout.coupon.apply")}
                             </Button>
                           </div>
                         </div>
@@ -487,27 +506,27 @@ const Checkout = () => {
 
                     <div className="border-t pt-4">
                       <div className="flex justify-between text-muted-foreground mb-2">
-                        <span>Subtotal</span>
+                        <span>{t("checkout.summary.subtotal")}</span>
                         <span>${totalPrice.toFixed(2)}</span>
                       </div>
                       {appliedCoupon && (
                         <div className="flex justify-between text-green-600 mb-2">
-                          <span>Discount ({appliedCoupon.code})</span>
+                          <span>{t("checkout.coupon.discountLabel", { code: appliedCoupon.code })}</span>
                           <span>-${appliedCoupon.discount.toFixed(2)}</span>
                         </div>
                       )}
                       <div className="flex justify-between text-muted-foreground mb-2">
-                        <span>Shipping</span>
-                        <span>Free</span>
+                        <span>{t("checkout.summary.shipping")}</span>
+                        <span>{t("checkout.summary.free")}</span>
                       </div>
                       <div className="flex justify-between text-xl font-bold text-primary mt-4">
-                        <span>Total</span>
+                        <span>{t("checkout.summary.total")}</span>
                         <span>${finalTotal.toFixed(2)}</span>
                       </div>
                     </div>
                   </div>
                   <Button type="submit" className="w-full gradient-roman text-lg py-6">
-                    Place Order
+                    {t("checkout.buttons.placeOrder")}
                   </Button>
                 </div>
               </div>
@@ -525,26 +544,37 @@ const Checkout = () => {
                 <CheckCircle className="h-16 w-16 text-green-500" />
               </div>
               <h2 className="text-2xl sm:text-3xl font-display font-bold text-center text-primary mb-2">
-                Order Confirmed!
+                {t("checkout.confirmation.title")}
               </h2>
               <p className="text-center text-sm sm:text-base text-muted-foreground mb-6">
-                Thank you for your purchase. Your order has been placed successfully.
+                {t("checkout.confirmation.subtitle")}
               </p>
 
               <div className="bg-gray-50 rounded-lg p-4 mb-6">
                 <div className="flex items-center gap-2 mb-2">
                   <Package className="h-5 w-5 text-primary" />
-                  <span className="font-semibold">Order #{orderDetails.orderId}</span>
+                  <span className="font-semibold">
+                    {t("checkout.confirmation.orderNumber", { id: orderDetails.orderId })}
+                  </span>
                 </div>
                 <div className="text-sm text-muted-foreground space-y-1">
-                  <p>Order Date: {new Date(orderDetails.orderDate).toLocaleDateString()}</p>
-                  <p>Status: {orderDetails.orderStatus}</p>
-                  <p>Payment: {orderDetails.paymentStatus} ({orderDetails.paymentMethod})</p>
+                  <p>
+                    {t("checkout.confirmation.orderDate", {
+                      date: new Date(orderDetails.orderDate).toLocaleDateString(),
+                    })}
+                  </p>
+                  <p>{t("checkout.confirmation.status", { status: orderDetails.orderStatus })}</p>
+                  <p>
+                    {t("checkout.confirmation.payment", {
+                      status: orderDetails.paymentStatus,
+                      method: orderDetails.paymentMethod,
+                    })}
+                  </p>
                 </div>
               </div>
 
               <div className="space-y-4 mb-6">
-                <h3 className="text-xl font-semibold">Order Items</h3>
+                <h3 className="text-xl font-semibold">{t("checkout.confirmation.itemsTitle")}</h3>
                 {orderDetails.orderItems.map((item) => {
                   const primaryImage = item.variant?.product?.images?.find(img => img.isPrimary) || item.variant?.product?.images?.[0];
                   return (
@@ -568,7 +598,7 @@ const Checkout = () => {
                           {item.variant?.color || "N/A"} / {item.variant?.size || "N/A"}
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          Quantity: {item.quantity}
+                          {t("checkout.confirmation.quantity", { count: item.quantity })}
                         </p>
                       </div>
                       <div className="text-right">
@@ -584,7 +614,7 @@ const Checkout = () => {
 
               <div className="border-t pt-4">
                 <div className="flex justify-between items-center text-lg font-semibold">
-                  <span>Total:</span>
+                  <span>{t("checkout.confirmation.total")}</span>
                   <span>${orderDetails.totalPrice.toFixed(2)}</span>
                 </div>
               </div>
@@ -594,7 +624,7 @@ const Checkout = () => {
                   onClick={() => navigate("/")}
                   className="flex-1 gradient-roman"
                 >
-                  Continue Shopping
+                  {t("checkout.buttons.continueShopping")}
                 </Button>
                 <Button
                   onClick={() => {
@@ -604,7 +634,7 @@ const Checkout = () => {
                   variant="outline"
                   className="flex-1"
                 >
-                  Close
+                  {t("checkout.buttons.close")}
                 </Button>
               </div>
             </div>
