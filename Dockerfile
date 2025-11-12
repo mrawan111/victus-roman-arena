@@ -1,15 +1,20 @@
-# Use Nginx to serve prebuilt React app
+# Stage 1: Build with Node
+FROM node:20 AS builder
+WORKDIR /app
+
+# Copy package files and install dependencies
+COPY package*.json ./
+RUN npm install
+
+# Copy the rest of the source code
+COPY . .
+
+# Build the Vite app (this creates /app/dist)
+RUN npm run build
+
+# Stage 2: Serve with Nginx
 FROM nginx:alpine
-WORKDIR /usr/share/nginx/html
+COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Remove default Nginx content
-RUN rm -rf ./*
-
-# Copy prebuilt React build folder
-COPY build/ .
-
-# Expose port
 EXPOSE 80
-
-# Run Nginx
 CMD ["nginx", "-g", "daemon off;"]
